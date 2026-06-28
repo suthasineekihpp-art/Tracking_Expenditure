@@ -1,0 +1,5027 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIV/AIDS Expenditure Dashboard (2024-2025)</title>
+    
+    <!-- Google Fonts: Inter & Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(22, 28, 45, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #3b82f6; /* Blue */
+            --accent-success: #10b981; /* Green */
+            --cso-color: #f59e0b; /* Amber */
+            --cbo-color: #ec4899; /* Pink */
+            --clo-color: #8b5cf6; /* Violet */
+            --grid-border: rgba(255, 255, 255, 0.05);
+            --font-main: 'Inter', 'Sarabun', sans-serif;
+            --glass-blur: blur(12px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 24px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .dashboard-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header Area */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Controls Section */
+        .controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button {
+            background: #1e293b;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            font-family: var(--font-main);
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover {
+            border-color: var(--accent-primary);
+            background: #334155;
+        }
+
+        .btn-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        .btn-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .tab-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: var(--glass-blur);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-primary);
+            opacity: 0.7;
+        }
+
+        .kpi-card.cso::before { background: var(--cso-color); }
+        .kpi-card.cbo::before { background: var(--cbo-color); }
+        .kpi-card.clo::before { background: var(--clo-color); }
+        .kpi-card.success::before { background: var(--accent-success); }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .kpi-subtext {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .trend-up {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .trend-down {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* Main Dashboard Sections */
+        .dashboard-row-2col {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-row-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Charts styling */
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* Tables & Matrices Section */
+        .matrix-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .matrix-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-matrix-tab {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .btn-matrix-tab.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Custom Table Design */
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--grid-border);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .row-total {
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .row-total td {
+            border-top: 1px double var(--card-border);
+            color: #fff;
+        }
+
+        .num-col {
+            text-align: right;
+            font-family: 'Inter', monospace;
+        }
+
+        .txt-col {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .imp-cell {
+            font-weight: 600;
+        }
+
+        .cso-text { color: var(--cso-color); }
+        .cbo-text { color: var(--cbo-color); }
+        .clo-text { color: var(--clo-color); }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        /* Category description label formatting */
+        .cat-code {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+
+        .cat-title {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .cat-desc {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .scrollable-tbody {
+            display: block;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Full Width Card */
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        /* Legend component */
+        .legend-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .legend-cso { background: var(--cso-color); }
+        .legend-cbo { background: var(--cbo-color); }
+        .legend-clo { background: var(--clo-color); }
+
+        /* Responsive layout tweaks */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            .controls {
+                flex-direction: column;
+                width: 100%;
+                align-items: stretch;
+            }
+            .tab-group, .control-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            <h1>HIV/AIDS Expenditure Dashboard</h1>
+            <p>วิเคราะห์งบประมาณปี 2024 - 2025 แยกตามประเภทองค์กร (CSO/CBO/CLO) และกลุ่มประชากรเป้าหมาย</p>
+        </div>
+        
+        <div class="controls">
+            <!-- Year Selector -->
+            <div class="tab-group" id="year-selector">
+                <button class="btn-tab active" onclick="setYear('2024')">2024</button>
+                <button class="btn-tab" onclick="setYear('2025')">2025</button>
+                <button class="btn-tab" onclick="setYear('YoY')">YoY Comparison</button>
+            </div>
+            
+            <!-- Fund Source Selector -->
+            <div class="control-group">
+                <span class="control-label">แหล่งทุน:</span>
+                <select id="fund-source" onchange="updateDashboard()">
+                    <option value="combined">ทั้งหมด (Domestic + Int)</option>
+                    <option value="domestic">ในประเทศ (Domestic)</option>
+                    <option value="international">ต่างประเทศ (International)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- KPI Summary Cards -->
+    <div class="kpi-grid" id="kpi-cards">
+        <!-- Rendered dynamically via JS -->
+    </div>
+
+    <!-- Charts Area -->
+    <div class="dashboard-row-2col" id="charts-row">
+        <!-- Chart 1: Category breakdown -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title" id="chart-cat-title">งบประมาณรายกิจกรรมหลัก (ASC.01 - ASC.08)</h2>
+                    <p class="card-subtitle" id="chart-cat-subtitle">เปรียบเทียบตามประเภทกิจกรรม</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Implementer share -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">สัดส่วนผู้ดำเนินงาน (Implementer Proportions)</h2>
+                    <p class="card-subtitle">สัดส่วนงบประมาณระหว่าง CSO, CBO และ CLO</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="implementerChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Population Group breakdown charts (Full Width) -->
+    <div class="card" id="pop-chart-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">งบประมาณจำแนกตามกลุ่มประชากรหลัก (Grouped Populations)</h2>
+                <p class="card-subtitle">เปรียบเทียบงบประมาณตามกลุ่มประชากร 5 กลุ่มหลัก</p>
+            </div>
+        </div>
+        <div class="chart-container" style="height: 250px;">
+            <canvas id="populationChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Detailed Population breakdown charts (Full Width) -->
+    <div class="card" id="detailed-pop-chart-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">งบประมาณจำแนกตามกลุ่มประชากรย่อยละเอียด (Detailed Populations)</h2>
+                <p class="card-subtitle">เปรียบเทียบตามกลุ่มประชากรเป้าหมายเฉพาะแบบเจาะลึก (หน่วย: บาท)</p>
+            </div>
+        </div>
+        <div class="chart-container" style="height: 520px;">
+            <canvas id="detailedPopulationChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Matrices & Tables Section -->
+    <div class="card full-width-card" id="matrix-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title" id="matrix-title">Matrix ระหว่างผู้ดำเนินงาน (CSO/CBO/CLO) กับกลุ่มประชากร</h2>
+                <p class="card-subtitle">แสดงจำนวนเต็มล้านบาท (ปัดทศนิยมออกทั้งหมดตามคำสั่งผู้ใช้งาน)</p>
+            </div>
+            
+            <div class="matrix-tabs">
+                <button class="btn-matrix-tab active" id="btn-matrix-grouped" onclick="setMatrixType('grouped')">แบบกลุ่มประชากรหลัก (5 กลุ่ม)</button>
+                <button class="btn-matrix-tab" id="btn-matrix-detailed" onclick="setMatrixType('detailed')">แบบกลุ่มประชากรย่อยละเอียด</button>
+            </div>
+        </div>
+        
+        <div class="table-wrapper" id="matrix-table-container">
+            <!-- Table rendered dynamically via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inject parsed data
+    const rawData = {
+  "pop_groups": [
+    "PLHIV",
+    "KPs",
+    "Vulnerable",
+    "Gen Pop",
+    "Others"
+  ],
+  "detailed_pops_2024": [
+    "PLHIV",
+    "PWID",
+    "SW",
+    "MSM",
+    "TG",
+    "KPnotdis",
+    "Migrant",
+    "PMTCT",
+    "Indigenous",
+    "PartnerPLHIV",
+    "Youth",
+    "Genpop",
+    "GenPop_notdis",
+    "Others"
+  ],
+  "detailed_pops_2025": [
+    "PLHIV",
+    "CLHIV",
+    "PLHIVnotdis",
+    "PWID",
+    "SW",
+    "MSM",
+    "TG",
+    "Prisoner",
+    "KPnotdis",
+    "Migrant",
+    "OVC",
+    "PMTCT",
+    "Indigenous",
+    "PartnerPLHIV",
+    "HCW",
+    "Employees",
+    "Vulnerablenotdis",
+    "OtherVuln",
+    "Children",
+    "Youth",
+    "Genpop",
+    "GenPop_notdis",
+    "Others"
+  ],
+  "data_2024": {
+    "grouped": {
+      "CSO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 899826.7999999999,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 65279513.38819647,
+              "Vulnerable": 1117656.161988563,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 899826.7999999999,
+            "int_total": 66397169.55018503,
+            "grand_total": 67296996.35018504
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 3227835.582951135,
+              "Vulnerable": 1273128.367048865,
+              "Gen Pop": 0.0,
+              "Others": 83804.65000000001
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 23060649.73043595,
+              "Vulnerable": 1379454.6,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 4584768.600000001,
+            "int_total": 24440104.33043595,
+            "grand_total": 29024872.93043596
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 52240.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 1338066.882937637,
+              "Vulnerable": 1073788.776096856,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 52240.0,
+            "int_total": 2411855.659034494,
+            "grand_total": 2464095.659034494
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 352507.0,
+              "Gen Pop": 0.0,
+              "Others": 24160.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 369004.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 376667.0,
+            "int_total": 369004.0,
+            "grand_total": 745671.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 799077.2499999999,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 11117849.57475662,
+              "Vulnerable": 10861054.43860356,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 799077.2499999999,
+            "int_total": 21978904.01336018,
+            "grand_total": 22777981.26336018
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 3543160.350000001,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 4947240.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 205354546.7284874,
+              "Vulnerable": 37357878.95863073,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 8490400.350000001,
+            "int_total": 242712425.6871182,
+            "grand_total": 251202826.0371182
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 451805.5165180658,
+              "Vulnerable": 1909.77794883178,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 0.0,
+            "int_total": 453715.2944668976,
+            "grand_total": 453715.2944668976
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "KPs": 8522139.982951136,
+            "Vulnerable": 1625635.367048865,
+            "Gen Pop": 0.0,
+            "Others": 5055204.65
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "KPs": 306971435.8213322,
+            "Vulnerable": 51791742.71326855,
+            "Gen Pop": 0.0,
+            "Others": 0.0
+          },
+          "dom_total": 15202980.0,
+          "int_total": 358763178.5346007,
+          "grand_total": 373966158.5346007
+        }
+      },
+      "CBO": {
+        "categories": {
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 3428782.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 579743.0,
+              "Others": 45000.0
+            },
+            "dom_total": 3428782.0,
+            "int_total": 624743.0,
+            "grand_total": 4053525.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "KPs": 0.0,
+            "Vulnerable": 0.0,
+            "Gen Pop": 3428782.0,
+            "Others": 0.0
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "KPs": 0.0,
+            "Vulnerable": 0.0,
+            "Gen Pop": 579743.0,
+            "Others": 45000.0
+          },
+          "dom_total": 3428782.0,
+          "int_total": 624743.0,
+          "grand_total": 4053525.0
+        }
+      },
+      "CLO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 122.74,
+              "KPs": 3994146.58,
+              "Vulnerable": 489.25,
+              "Gen Pop": 124851.46,
+              "Others": 3683.68
+            },
+            "international": {
+              "PLHIV": 729.4387,
+              "KPs": 11694883.834065,
+              "Vulnerable": 702934.3274,
+              "Gen Pop": 231480.519835,
+              "Others": 45958.0
+            },
+            "dom_total": 4123293.71,
+            "int_total": 12675986.12,
+            "grand_total": 16799279.83
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 80976194.18,
+              "Vulnerable": 22753.96,
+              "Gen Pop": 465462.91,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 102.8,
+              "KPs": 37708623.42,
+              "Vulnerable": 1105139.52,
+              "Gen Pop": 645227.7999999999,
+              "Others": 0.0
+            },
+            "dom_total": 81464411.05,
+            "int_total": 39459093.54,
+            "grand_total": 120923504.59
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 431963.84,
+              "Vulnerable": 51.68,
+              "Gen Pop": 50568.48,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 12567979.56,
+              "Vulnerable": 450080.69,
+              "Gen Pop": 750053.69,
+              "Others": 66793.45
+            },
+            "dom_total": 482583.9999999999,
+            "int_total": 13834907.39,
+            "grand_total": 14317491.39
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 2605000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 80000.0,
+              "Others": 77359.0
+            },
+            "international": {
+              "PLHIV": 225000.0,
+              "KPs": 4511542.225000001,
+              "Vulnerable": 0.0,
+              "Gen Pop": 140000.0,
+              "Others": 1947635.15
+            },
+            "dom_total": 2762359.0,
+            "int_total": 6824177.375,
+            "grand_total": 9586536.375
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 150000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 3380724.34
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 27200924.53,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 12728689.67
+            },
+            "dom_total": 3530724.34,
+            "int_total": 39929614.2,
+            "grand_total": 43460338.54000001
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 275000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 20000.0,
+              "Others": 2000.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 460000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 50000.0,
+              "Others": 400000.0
+            },
+            "dom_total": 297000.0,
+            "int_total": 910000.0,
+            "grand_total": 1207000.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 122.74,
+            "KPs": 88432304.60000001,
+            "Vulnerable": 23294.89,
+            "Gen Pop": 740882.85,
+            "Others": 3463767.02
+          },
+          "international": {
+            "PLHIV": 225832.2387,
+            "KPs": 94143953.569065,
+            "Vulnerable": 2258154.5374,
+            "Gen Pop": 1816762.009835,
+            "Others": 15189076.27
+          },
+          "dom_total": 92660372.1,
+          "int_total": 113633778.625,
+          "grand_total": 206294150.725
+        }
+      },
+      "TOTAL": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 122.74,
+              "KPs": 4893973.38,
+              "Vulnerable": 489.25,
+              "Gen Pop": 124851.46,
+              "Others": 3683.68
+            },
+            "international": {
+              "PLHIV": 729.4387,
+              "KPs": 76974397.22226147,
+              "Vulnerable": 1820590.4893885627,
+              "Gen Pop": 231480.519835,
+              "Others": 45958.0
+            },
+            "dom_total": 5023120.51,
+            "int_total": 79073155.67018503,
+            "grand_total": 84096276.18018503
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 84204029.76295114,
+              "Vulnerable": 1295882.327048865,
+              "Gen Pop": 465462.91,
+              "Others": 83804.65000000001
+            },
+            "international": {
+              "PLHIV": 102.8,
+              "KPs": 60769273.150435954,
+              "Vulnerable": 2484594.12,
+              "Gen Pop": 645227.7999999999,
+              "Others": 0.0
+            },
+            "dom_total": 86049179.64999999,
+            "int_total": 63899197.87043595,
+            "grand_total": 149948377.52043596
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 484203.84,
+              "Vulnerable": 51.68,
+              "Gen Pop": 50568.48,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 13906046.442937637,
+              "Vulnerable": 1523869.466096856,
+              "Gen Pop": 750053.69,
+              "Others": 66793.45
+            },
+            "dom_total": 534823.9999999999,
+            "int_total": 16246763.049034495,
+            "grand_total": 16781587.049034495
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 352507.0,
+              "Gen Pop": 0.0,
+              "Others": 24160.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 369004.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 376667.0,
+            "int_total": 369004.0,
+            "grand_total": 745671.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 3404077.25,
+              "Vulnerable": 0.0,
+              "Gen Pop": 3508782.0,
+              "Others": 77359.0
+            },
+            "international": {
+              "PLHIV": 225000.0,
+              "KPs": 15629391.79975662,
+              "Vulnerable": 10861054.43860356,
+              "Gen Pop": 719743.0,
+              "Others": 1992635.15
+            },
+            "dom_total": 6990218.25,
+            "int_total": 29427824.38836018,
+            "grand_total": 36418042.63836018
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 3693160.350000001,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 8327964.34
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 232555471.2584874,
+              "Vulnerable": 37357878.95863073,
+              "Gen Pop": 0.0,
+              "Others": 12728689.67
+            },
+            "dom_total": 12021124.690000001,
+            "int_total": 282642039.8871182,
+            "grand_total": 294663164.5771182
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 275000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 20000.0,
+              "Others": 2000.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 911805.5165180658,
+              "Vulnerable": 1909.77794883178,
+              "Gen Pop": 50000.0,
+              "Others": 400000.0
+            },
+            "dom_total": 297000.0,
+            "int_total": 1363715.2944668976,
+            "grand_total": 1660715.2944668976
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 122.74,
+            "KPs": 96954444.58295114,
+            "Vulnerable": 1648930.2570488648,
+            "Gen Pop": 4169664.85,
+            "Others": 8518971.67
+          },
+          "international": {
+            "PLHIV": 225832.2387,
+            "KPs": 401115389.3903972,
+            "Vulnerable": 54049897.25066855,
+            "Gen Pop": 2396505.009835,
+            "Others": 15234076.27
+          },
+          "dom_total": 111292134.1,
+          "int_total": 473021700.1596007,
+          "grand_total": 584313834.2596006
+        }
+      }
+    },
+    "detailed": {
+      "CSO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 25.79843367596672,
+              "SW": 183707.0171519233,
+              "MSM": 695204.7804403154,
+              "TG": 20889.2039740853,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 63345951.11,
+              "SW": 338203.3238098032,
+              "MSM": 1292781.139874424,
+              "TG": 20060.03451224429,
+              "KPnotdis": 282517.78,
+              "Migrant": 1117656.161988563,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 899826.7999999999,
+            "int_total": 66397169.55018504,
+            "grand_total": 67296996.35018504
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 331.7181961195595,
+              "SW": 89409.41784420493,
+              "MSM": 3072133.379540793,
+              "TG": 65961.06737001734,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 1273128.367048865,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 83804.65000000001
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 3961727.54,
+              "SW": 434917.8358736218,
+              "MSM": 4024859.018261309,
+              "TG": 37369.55630102323,
+              "KPnotdis": 14601775.78,
+              "Migrant": 1379454.6,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 4584768.600000001,
+            "int_total": 24440104.33043595,
+            "grand_total": 29024872.93043596
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 9000.0,
+              "MSM": 43240.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 800245.0,
+              "SW": 47952.75296976061,
+              "MSM": 11405.65594081539,
+              "TG": 623.6840270615075,
+              "KPnotdis": 477839.79,
+              "Migrant": 1073788.776096856,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 52240.0,
+            "int_total": 2411855.659034494,
+            "grand_total": 2464095.659034494
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 352507.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 24160.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 369004.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 376667.0,
+            "int_total": 369004.0,
+            "grand_total": 745671.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 49.46157611355849,
+              "SW": 44032.64884719902,
+              "MSM": 715659.665801866,
+              "TG": 39335.47377482138,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 7066455.383320129,
+              "SW": 56553.30719331839,
+              "MSM": 494225.7205431833,
+              "TG": 4478.05226349832,
+              "KPnotdis": 3496137.11143649,
+              "Migrant": 10861054.43860356,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 799077.25,
+            "int_total": 21978904.01336018,
+            "grand_total": 22777981.26336018
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 199.755080763583,
+              "SW": 155202.934349081,
+              "MSM": 3315088.425052142,
+              "TG": 72669.23551801423,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 4947240.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 102073423.8938215,
+              "SW": 1920435.185603455,
+              "MSM": 22959943.01817096,
+              "TG": 253389.1262255908,
+              "KPnotdis": 78147355.50466593,
+              "Migrant": 37357878.95863073,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 8490400.350000001,
+            "int_total": 242712425.6871182,
+            "grand_total": 251202826.0371182
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 15936.75807121769,
+              "MSM": 173399.3819935911,
+              "TG": 2360.489935191186,
+              "KPnotdis": 260108.8865180659,
+              "Migrant": 1909.77794883178,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 0.0,
+            "int_total": 453715.2944668977,
+            "grand_total": 453715.2944668977
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "PWID": 606.7332866726676,
+            "SW": 481352.0181924081,
+            "MSM": 7841326.250835117,
+            "TG": 198854.9806369382,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "PMTCT": 1625635.367048865,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 0.0,
+            "Others": 5055204.65
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "PWID": 177616806.9271416,
+            "SW": 2813999.163521176,
+            "MSM": 28956613.93478429,
+            "TG": 318280.9432646093,
+            "KPnotdis": 97265734.85262048,
+            "Migrant": 51791742.71326855,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 0.0,
+            "Others": 0.0
+          },
+          "dom_total": 15202980.0,
+          "int_total": 358763178.5346007,
+          "grand_total": 373966158.5346007
+        }
+      },
+      "CBO": {
+        "categories": {
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 3428782.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 579743.0,
+              "Others": 45000.0
+            },
+            "dom_total": 3428782.0,
+            "int_total": 624743.0,
+            "grand_total": 4053525.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "PWID": 0.0,
+            "SW": 0.0,
+            "MSM": 0.0,
+            "TG": 0.0,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 3428782.0,
+            "Others": 0.0
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "PWID": 0.0,
+            "SW": 0.0,
+            "MSM": 0.0,
+            "TG": 0.0,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 579743.0,
+            "Others": 45000.0
+          },
+          "dom_total": 3428782.0,
+          "int_total": 624743.0,
+          "grand_total": 4053525.0
+        }
+      },
+      "CLO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 122.74,
+              "PWID": 360061.37,
+              "SW": 237354.01,
+              "MSM": 1966072.48,
+              "TG": 1430658.72,
+              "KPnotdis": 0.0,
+              "Migrant": 427.65,
+              "PMTCT": 0.0,
+              "Indigenous": 61.6,
+              "PartnerPLHIV": 0.0,
+              "Youth": 124418.64,
+              "Genpop": 432.82,
+              "GenPop_notdis": 0.0,
+              "Others": 3683.68
+            },
+            "international": {
+              "PLHIV": 729.4387,
+              "PWID": 2391317.05,
+              "SW": 3001783.24931,
+              "MSM": 3498938.567355,
+              "TG": 2202844.9674,
+              "KPnotdis": 600000.0,
+              "Migrant": 702855.4273999999,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 78.9,
+              "Youth": 228813.274,
+              "Genpop": 2667.245835,
+              "GenPop_notdis": 0.0,
+              "Others": 45958.0
+            },
+            "dom_total": 4123293.71,
+            "int_total": 12675986.12,
+            "grand_total": 16799279.83
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 606320.55,
+              "SW": 57058112.4,
+              "MSM": 14416479.05,
+              "TG": 8895282.18,
+              "KPnotdis": 0.0,
+              "Migrant": 22753.96,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 452821.82,
+              "Genpop": 12641.09,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 102.8,
+              "PWID": 1462517.9,
+              "SW": 26294695.12,
+              "MSM": 3947298.78,
+              "TG": 5004111.62,
+              "KPnotdis": 1000000.0,
+              "Migrant": 1104111.62,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 1027.9,
+              "Youth": 641116.2,
+              "Genpop": 4111.6,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 81464411.05,
+            "int_total": 39459093.54000001,
+            "grand_total": 120923504.59
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 30051.68,
+              "MSM": 201808.8,
+              "TG": 200103.36,
+              "KPnotdis": 0.0,
+              "Migrant": 51.68,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 50490.96,
+              "Genpop": 77.52,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 3353994.65,
+              "SW": 3662639.01,
+              "MSM": 1851210.0,
+              "TG": 1800135.9,
+              "KPnotdis": 1900000.0,
+              "Migrant": 450080.69,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 750000.0,
+              "Genpop": 53.69,
+              "GenPop_notdis": 0.0,
+              "Others": 66793.45
+            },
+            "dom_total": 482584.0,
+            "int_total": 13834907.39,
+            "grand_total": 14317491.39
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 1302500.0,
+              "TG": 1302500.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 80000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 77359.0
+            },
+            "international": {
+              "PLHIV": 225000.0,
+              "PWID": 574103.385,
+              "SW": 3527438.84,
+              "MSM": 410000.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 140000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 1947635.15
+            },
+            "dom_total": 2762359.0,
+            "int_total": 6824177.375,
+            "grand_total": 9586536.375
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 50000.0,
+              "TG": 100000.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 3380724.34
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 27166833.66,
+              "SW": 34090.8699999996,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 12728689.67
+            },
+            "dom_total": 3530724.34,
+            "int_total": 39929614.2,
+            "grand_total": 43460338.54000001
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 125000.0,
+              "TG": 150000.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 20000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 2000.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 230000.0,
+              "MSM": 230000.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 50000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 400000.0
+            },
+            "dom_total": 297000.0,
+            "int_total": 910000.0,
+            "grand_total": 1207000.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 122.74,
+            "PWID": 966381.92,
+            "SW": 57325518.09,
+            "MSM": 18061860.33,
+            "TG": 12078544.26,
+            "KPnotdis": 0.0,
+            "Migrant": 23233.29,
+            "PMTCT": 0.0,
+            "Indigenous": 61.6,
+            "PartnerPLHIV": 0.0,
+            "Youth": 727731.4199999999,
+            "Genpop": 13151.43,
+            "GenPop_notdis": 0.0,
+            "Others": 3463767.02
+          },
+          "international": {
+            "PLHIV": 225832.2387,
+            "PWID": 34948766.645,
+            "SW": 36750647.08931,
+            "MSM": 9937447.347355,
+            "TG": 9007092.4874,
+            "KPnotdis": 3500000.0,
+            "Migrant": 2257047.7374,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 1106.8,
+            "Youth": 1809929.474,
+            "Genpop": 6832.535835,
+            "GenPop_notdis": 0.0,
+            "Others": 15189076.27
+          },
+          "dom_total": 92660372.1,
+          "int_total": 113633778.625,
+          "grand_total": 206294150.725
+        }
+      },
+      "TOTAL": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 122.74,
+              "PWID": 360087.16843367595,
+              "SW": 421061.0271519233,
+              "MSM": 2661277.260440315,
+              "TG": 1451547.9239740854,
+              "KPnotdis": 0.0,
+              "Migrant": 427.65,
+              "PMTCT": 0.0,
+              "Indigenous": 61.6,
+              "PartnerPLHIV": 0.0,
+              "Youth": 124418.64,
+              "Genpop": 432.82,
+              "GenPop_notdis": 0.0,
+              "Others": 3683.68
+            },
+            "international": {
+              "PLHIV": 729.4387,
+              "PWID": 65737268.16,
+              "SW": 3339986.573119803,
+              "MSM": 4791719.707229424,
+              "TG": 2222905.001912244,
+              "KPnotdis": 882517.78,
+              "Migrant": 1820511.5893885628,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 78.9,
+              "Youth": 228813.274,
+              "Genpop": 2667.245835,
+              "GenPop_notdis": 0.0,
+              "Others": 45958.0
+            },
+            "dom_total": 5023120.51,
+            "int_total": 79073155.67018504,
+            "grand_total": 84096276.18018503
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 606652.2681961196,
+              "SW": 57147521.817844205,
+              "MSM": 17488612.429540794,
+              "TG": 8961243.247370018,
+              "KPnotdis": 0.0,
+              "Migrant": 22753.96,
+              "PMTCT": 1273128.367048865,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 452821.82,
+              "Genpop": 12641.09,
+              "GenPop_notdis": 0.0,
+              "Others": 83804.65000000001
+            },
+            "international": {
+              "PLHIV": 102.8,
+              "PWID": 5424245.4399999995,
+              "SW": 26729612.955873623,
+              "MSM": 7972157.798261309,
+              "TG": 5041481.176301023,
+              "KPnotdis": 15601775.78,
+              "Migrant": 2483566.22,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 1027.9,
+              "Youth": 641116.2,
+              "Genpop": 4111.6,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 86049179.64999999,
+            "int_total": 63899197.87043595,
+            "grand_total": 149948377.52043596
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 39051.68,
+              "MSM": 245048.8,
+              "TG": 200103.36,
+              "KPnotdis": 0.0,
+              "Migrant": 51.68,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 50490.96,
+              "Genpop": 77.52,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 4154239.65,
+              "SW": 3710591.76296976,
+              "MSM": 1862615.6559408153,
+              "TG": 1800759.5840270615,
+              "KPnotdis": 2377839.79,
+              "Migrant": 1523869.466096856,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 750000.0,
+              "Genpop": 53.69,
+              "GenPop_notdis": 0.0,
+              "Others": 66793.45
+            },
+            "dom_total": 534824.0,
+            "int_total": 16246763.049034495,
+            "grand_total": 16781587.049034495
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 352507.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 24160.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 369004.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 376667.0,
+            "int_total": 369004.0,
+            "grand_total": 745671.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 49.46157611355849,
+              "SW": 44032.64884719902,
+              "MSM": 2018159.665801866,
+              "TG": 1341835.4737748215,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 80000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 3428782.0,
+              "Others": 77359.0
+            },
+            "international": {
+              "PLHIV": 225000.0,
+              "PWID": 7640558.768320128,
+              "SW": 3583992.1471933182,
+              "MSM": 904225.7205431834,
+              "TG": 4478.05226349832,
+              "KPnotdis": 3496137.11143649,
+              "Migrant": 10861054.43860356,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 140000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 579743.0,
+              "Others": 1992635.15
+            },
+            "dom_total": 6990218.25,
+            "int_total": 29427824.38836018,
+            "grand_total": 36418042.63836018
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 199.755080763583,
+              "SW": 155202.934349081,
+              "MSM": 3365088.425052142,
+              "TG": 172669.23551801423,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 8327964.34
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 129240257.55382149,
+              "SW": 1954526.0556034546,
+              "MSM": 22959943.01817096,
+              "TG": 253389.1262255908,
+              "KPnotdis": 78147355.50466593,
+              "Migrant": 37357878.95863073,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 12728689.67
+            },
+            "dom_total": 12021124.690000001,
+            "int_total": 282642039.8871182,
+            "grand_total": 294663164.5771182
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 125000.0,
+              "TG": 150000.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 20000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 2000.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "PWID": 0.0,
+              "SW": 245936.7580712177,
+              "MSM": 403399.3819935911,
+              "TG": 2360.489935191186,
+              "KPnotdis": 260108.8865180659,
+              "Migrant": 1909.77794883178,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "Youth": 50000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 400000.0
+            },
+            "dom_total": 297000.0,
+            "int_total": 1363715.2944668978,
+            "grand_total": 1660715.2944668978
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 122.74,
+            "PWID": 966988.6532866727,
+            "SW": 57806870.108192414,
+            "MSM": 25903186.580835115,
+            "TG": 12277399.240636937,
+            "KPnotdis": 0.0,
+            "Migrant": 23233.29,
+            "PMTCT": 1625635.367048865,
+            "Indigenous": 61.6,
+            "PartnerPLHIV": 0.0,
+            "Youth": 727731.4199999999,
+            "Genpop": 13151.43,
+            "GenPop_notdis": 3428782.0,
+            "Others": 8518971.67
+          },
+          "international": {
+            "PLHIV": 225832.2387,
+            "PWID": 212565573.57214162,
+            "SW": 39564646.252831176,
+            "MSM": 38894061.28213929,
+            "TG": 9325373.43066461,
+            "KPnotdis": 100765734.85262048,
+            "Migrant": 54048790.45066855,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 1106.8,
+            "Youth": 1809929.474,
+            "Genpop": 6832.535835,
+            "GenPop_notdis": 579743.0,
+            "Others": 15234076.27
+          },
+          "dom_total": 111292134.1,
+          "int_total": 473021700.1596007,
+          "grand_total": 584313834.2596006
+        }
+      }
+    }
+  },
+  "data_2025": {
+    "grouped": {
+      "CSO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 1924650.0,
+              "KPs": 2769972.2,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 31280256.89180353,
+              "Vulnerable": 651172.17,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 4694622.2,
+            "int_total": 31931429.06180353,
+            "grand_total": 36626051.26180353
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 4896877.960021317,
+              "Vulnerable": 2231353.56997868,
+              "Gen Pop": 2749500.0,
+              "Others": 144704.76
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 9429659.569564048,
+              "Vulnerable": 566954.83,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 10022436.29,
+            "int_total": 9996614.399564048,
+            "grand_total": 20019050.68956405
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 193425.0000000005,
+              "Vulnerable": 0.0,
+              "Gen Pop": 824850.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 1375321.497062362,
+              "Vulnerable": 718926.297725603,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 1018275.0,
+            "int_total": 2094247.794787965,
+            "grand_total": 3112522.794787966
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 460000.0,
+              "KPs": 0.0,
+              "Vulnerable": 342774.0,
+              "Gen Pop": 0.0,
+              "Others": 42170.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 19089.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 844944.0,
+            "int_total": 19089.0,
+            "grand_total": 864033.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 1041051.498422175,
+              "Vulnerable": 117439.6615778252,
+              "Gen Pop": 1890000.0,
+              "Others": 7616.040000000001
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 5417535.68303482,
+              "Vulnerable": 1734943.101379924,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 3056107.2,
+            "int_total": 7152478.784414744,
+            "grand_total": 10208585.98441475
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 2489025.310080003,
+              "Vulnerable": 0.0,
+              "Gen Pop": 10000.0,
+              "Others": 7012118.49
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 168388461.0837339,
+              "Vulnerable": 25044705.79478952,
+              "Gen Pop": 0.0,
+              "Others": 700000.0
+            },
+            "dom_total": 9511143.800080003,
+            "int_total": 194133166.8785235,
+            "grand_total": 203644310.6786035
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 300000.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 384973.3663517815,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 300000.0,
+            "int_total": 384973.3663517815,
+            "grand_total": 684973.3663517814
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 2384650.0,
+            "KPs": 11390351.9685235,
+            "Vulnerable": 2691567.231556505,
+            "Gen Pop": 5774350.0,
+            "Others": 7206609.29
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "KPs": 216295297.0915505,
+            "Vulnerable": 28716702.19389505,
+            "Gen Pop": 0.0,
+            "Others": 700000.0
+          },
+          "dom_total": 29447528.49008,
+          "int_total": 245711999.2854455,
+          "grand_total": 275159527.7755256
+        }
+      },
+      "CBO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 195000.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 195000.0,
+            "int_total": 0.0,
+            "grand_total": 195000.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 1396326.0,
+              "Others": 796087.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 309055.0,
+              "Others": 45367.0
+            },
+            "dom_total": 2192413.0,
+            "int_total": 354422.0,
+            "grand_total": 2546835.0
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 416500.0
+            },
+            "dom_total": 0.0,
+            "int_total": 416500.0,
+            "grand_total": 416500.0
+          },
+          "ASC.08": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 349195.0
+            },
+            "dom_total": 0.0,
+            "int_total": 349195.0,
+            "grand_total": 349195.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "KPs": 0.0,
+            "Vulnerable": 0.0,
+            "Gen Pop": 1591326.0,
+            "Others": 796087.0
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "KPs": 0.0,
+            "Vulnerable": 0.0,
+            "Gen Pop": 309055.0,
+            "Others": 811062.0
+          },
+          "dom_total": 2387413.0,
+          "int_total": 1120117.0,
+          "grand_total": 3507530.0
+        }
+      },
+      "CLO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 729048.0,
+              "KPs": 5430456.5,
+              "Vulnerable": 926636.5,
+              "Gen Pop": 853543.5,
+              "Others": 36487.74
+            },
+            "international": {
+              "PLHIV": 293733.0000000001,
+              "KPs": 12093887.72,
+              "Vulnerable": 1156893.59,
+              "Gen Pop": 427332.52,
+              "Others": 9238.81
+            },
+            "dom_total": 7976172.24,
+            "int_total": 13981085.64,
+            "grand_total": 21957257.88
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 1846288.0,
+              "KPs": 99773182.71000001,
+              "Vulnerable": 2556449.3,
+              "Gen Pop": 1297404.0,
+              "Others": 10000.0
+            },
+            "international": {
+              "PLHIV": 2190351.900000001,
+              "KPs": 29364731.60000001,
+              "Vulnerable": 5513198.870000001,
+              "Gen Pop": 2776091.200000003,
+              "Others": 0.0
+            },
+            "dom_total": 105483324.01,
+            "int_total": 39844373.57000002,
+            "grand_total": 145327697.58
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 349172.0,
+              "KPs": 1241884.0,
+              "Vulnerable": 968202.0,
+              "Gen Pop": 554886.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 295562.0000000006,
+              "KPs": 7097315.800000001,
+              "Vulnerable": 770354.0000000014,
+              "Gen Pop": 1045645.700000001,
+              "Others": 52893.52
+            },
+            "dom_total": 3114144.0,
+            "int_total": 9261771.020000003,
+            "grand_total": 12375915.02
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 267846.0,
+              "KPs": 3627322.5,
+              "Vulnerable": 404615.0,
+              "Gen Pop": 381586.0,
+              "Others": 241316.15
+            },
+            "international": {
+              "PLHIV": 829780.0,
+              "KPs": 8085645.315000001,
+              "Vulnerable": 1230610.0,
+              "Gen Pop": 651779.9999999999,
+              "Others": 1295000.0
+            },
+            "dom_total": 4922685.65,
+            "int_total": 12092815.315,
+            "grand_total": 17015500.965
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 720616.0,
+              "KPs": 1591232.0,
+              "Vulnerable": 2161848.0,
+              "Gen Pop": 1080616.0,
+              "Others": 5109152.039999999
+            },
+            "international": {
+              "PLHIV": 141632.9999999999,
+              "KPs": 28959922.2166846,
+              "Vulnerable": 340476.9999999997,
+              "Gen Pop": 111805.0,
+              "Others": 11079021.42
+            },
+            "dom_total": 10663464.04,
+            "int_total": 40632858.6366846,
+            "grand_total": 51296322.6766846
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 1205924.0,
+              "KPs": 3115026.0,
+              "Vulnerable": 4435822.0,
+              "Gen Pop": 1961232.0,
+              "Others": 49152.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 460000.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 50000.0,
+              "Others": 1425000.0
+            },
+            "dom_total": 10767156.0,
+            "int_total": 1935000.0,
+            "grand_total": 12702156.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 5118894.0,
+            "KPs": 114779103.71,
+            "Vulnerable": 11453572.8,
+            "Gen Pop": 6129267.5,
+            "Others": 5446107.929999999
+          },
+          "international": {
+            "PLHIV": 3751059.900000001,
+            "KPs": 86061502.6516846,
+            "Vulnerable": 9011533.460000003,
+            "Gen Pop": 5062654.420000004,
+            "Others": 13861153.75
+          },
+          "dom_total": 142926945.94,
+          "int_total": 117747904.1816846,
+          "grand_total": 260674850.1216846
+        }
+      },
+      "TOTAL": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 2653698.0,
+              "KPs": 8200428.7,
+              "Vulnerable": 926636.5,
+              "Gen Pop": 1048543.5,
+              "Others": 36487.74
+            },
+            "international": {
+              "PLHIV": 293733.0000000001,
+              "KPs": 43374144.61180353,
+              "Vulnerable": 1808065.7600000002,
+              "Gen Pop": 427332.52,
+              "Others": 9238.81
+            },
+            "dom_total": 12865794.440000001,
+            "int_total": 45912514.701803535,
+            "grand_total": 58778309.14180353
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 1846288.0,
+              "KPs": 104670060.67002133,
+              "Vulnerable": 4787802.869978679,
+              "Gen Pop": 4046904.0,
+              "Others": 154704.76
+            },
+            "international": {
+              "PLHIV": 2190351.900000001,
+              "KPs": 38794391.16956405,
+              "Vulnerable": 6080153.700000001,
+              "Gen Pop": 2776091.200000003,
+              "Others": 0.0
+            },
+            "dom_total": 115505760.30000001,
+            "int_total": 49840987.96956407,
+            "grand_total": 165346748.26956406
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 349172.0,
+              "KPs": 1435309.0000000005,
+              "Vulnerable": 968202.0,
+              "Gen Pop": 1379736.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 295562.0000000006,
+              "KPs": 8472637.297062363,
+              "Vulnerable": 1489280.2977256044,
+              "Gen Pop": 1045645.700000001,
+              "Others": 52893.52
+            },
+            "dom_total": 4132419.0,
+            "int_total": 11356018.814787969,
+            "grand_total": 15488437.814787965
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 460000.0,
+              "KPs": 0.0,
+              "Vulnerable": 342774.0,
+              "Gen Pop": 0.0,
+              "Others": 42170.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 19089.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 844944.0,
+            "int_total": 19089.0,
+            "grand_total": 864033.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 267846.0,
+              "KPs": 4668373.998422175,
+              "Vulnerable": 522054.6615778252,
+              "Gen Pop": 3667912.0,
+              "Others": 1045019.1900000001
+            },
+            "international": {
+              "PLHIV": 829780.0,
+              "KPs": 13503180.99803482,
+              "Vulnerable": 2965553.101379924,
+              "Gen Pop": 960834.9999999999,
+              "Others": 1340367.0
+            },
+            "dom_total": 10171205.850000001,
+            "int_total": 19599716.099414743,
+            "grand_total": 29770921.949414752
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 720616.0,
+              "KPs": 4080257.310080003,
+              "Vulnerable": 2161848.0,
+              "Gen Pop": 1090616.0,
+              "Others": 12121270.53
+            },
+            "international": {
+              "PLHIV": 141632.9999999999,
+              "KPs": 197348383.3004185,
+              "Vulnerable": 25385182.79478952,
+              "Gen Pop": 111805.0,
+              "Others": 11779021.42
+            },
+            "dom_total": 20174607.84008,
+            "int_total": 234766025.5152081,
+            "grand_total": 254940633.3552881
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 1205924.0,
+              "KPs": 3115026.0,
+              "Vulnerable": 4435822.0,
+              "Gen Pop": 2261232.0,
+              "Others": 49152.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 844973.3663517814,
+              "Vulnerable": 0.0,
+              "Gen Pop": 50000.0,
+              "Others": 1841500.0
+            },
+            "dom_total": 11067156.0,
+            "int_total": 2736473.3663517814,
+            "grand_total": 13803629.366351781
+          },
+          "ASC.08": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "KPs": 0.0,
+              "Vulnerable": 0.0,
+              "Gen Pop": 0.0,
+              "Others": 349195.0
+            },
+            "dom_total": 0.0,
+            "int_total": 349195.0,
+            "grand_total": 349195.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 7503544.0,
+            "KPs": 126169455.6785235,
+            "Vulnerable": 14145140.031556506,
+            "Gen Pop": 13494943.5,
+            "Others": 13448804.219999999
+          },
+          "international": {
+            "PLHIV": 3751059.900000001,
+            "KPs": 302356799.7432351,
+            "Vulnerable": 37728235.65389505,
+            "Gen Pop": 5371709.420000004,
+            "Others": 15372215.75
+          },
+          "dom_total": 174761887.43008,
+          "int_total": 364580020.4671301,
+          "grand_total": 539341907.8972102
+        }
+      }
+    },
+    "detailed": {
+      "CSO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 1924650.0,
+              "PWID": 34.19789180588703,
+              "SW": 184293.2858822205,
+              "MSM": 2551978.208343234,
+              "TG": 33666.50788273996,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 29513735.75,
+              "SW": 53446.97841367764,
+              "MSM": 1040311.760291604,
+              "TG": 259112.6730982477,
+              "Prisoner": 0.0,
+              "KPnotdis": 413649.73,
+              "Migrant": 651172.17,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 4694622.2,
+            "int_total": 31931429.06180353,
+            "grand_total": 36626051.26180353
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 737.78071933724,
+              "SW": 154592.276679364,
+              "MSM": 4574096.647043183,
+              "TG": 167451.2555794339,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 2231353.56997868,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 2749500.0,
+              "Others": 144704.76
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 6768614.5,
+              "SW": 78349.7971345938,
+              "MSM": 1629506.99143633,
+              "TG": 150188.280993124,
+              "Prisoner": 0.0,
+              "KPnotdis": 803000.0,
+              "Migrant": 566954.83,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 10022436.29,
+            "int_total": 9996614.399564048,
+            "grand_total": 20019050.68956405
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 49.8282481309355,
+              "SW": 10591.0689028087,
+              "MSM": 173740.275813296,
+              "TG": 9043.8270357648,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 824850.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 1310827.09,
+              "SW": 52376.94185734558,
+              "MSM": 10997.50468312359,
+              "TG": 1119.960521893313,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 718926.297725603,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 1018275.0,
+            "int_total": 2094247.794787965,
+            "grand_total": 3112522.794787966
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 460000.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 342774.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 42170.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 19089.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 844944.0,
+            "int_total": 19089.0,
+            "grand_total": 864033.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 238.0564439140812,
+              "SW": 51700.4990699351,
+              "MSM": 929279.6846168537,
+              "TG": 59833.25829147206,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 117439.6615778252,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 1890000.0,
+              "Others": 7616.040000000001
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 5242796.38303482,
+              "SW": 1564.760207388204,
+              "MSM": 162610.1207316194,
+              "TG": 10564.4190609923,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 1734943.101379924,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 3056107.2,
+            "int_total": 7152478.784414744,
+            "grand_total": 10208585.98441475
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 210.6139618138423,
+              "SW": 114091.0849692121,
+              "MSM": 2331561.571803984,
+              "TG": 43162.03934499352,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 10000.0,
+              "Others": 7012118.49
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 102494971.6612593,
+              "SW": 290344.2799805573,
+              "MSM": 21328419.14020916,
+              "TG": 1960248.369810259,
+              "Prisoner": 0.0,
+              "KPnotdis": 42314477.63247465,
+              "Migrant": 25044705.79478952,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 700000.0
+            },
+            "dom_total": 9511143.800080003,
+            "int_total": 194133166.8785235,
+            "grand_total": 203644310.6786035
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 300000.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 12800.0,
+              "SW": 2153.848742709009,
+              "MSM": 158219.7133423346,
+              "TG": 14541.62791495644,
+              "Prisoner": 0.0,
+              "KPnotdis": 197258.1763517814,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 300000.0,
+            "int_total": 384973.3663517815,
+            "grand_total": 684973.3663517814
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 460000.0,
+            "CLHIV": 0.0,
+            "PLHIVnotdis": 1924650.0,
+            "PWID": 1270.477265001986,
+            "SW": 515268.2155035404,
+            "MSM": 10560656.38762055,
+            "TG": 313156.8881344043,
+            "Prisoner": 0.0,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "OVC": 0.0,
+            "PMTCT": 2691567.231556505,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "HCW": 0.0,
+            "Employees": 0.0,
+            "Vulnerablenotdis": 0.0,
+            "OtherVuln": 0.0,
+            "Children": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 5774350.0,
+            "Others": 7206609.290000001
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "CLHIV": 0.0,
+            "PLHIVnotdis": 0.0,
+            "PWID": 145362834.3842941,
+            "SW": 478236.6063362716,
+            "MSM": 24330065.23069417,
+            "TG": 2395775.331399472,
+            "Prisoner": 0.0,
+            "KPnotdis": 43728385.53882644,
+            "Migrant": 28716702.19389505,
+            "OVC": 0.0,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "HCW": 0.0,
+            "Employees": 0.0,
+            "Vulnerablenotdis": 0.0,
+            "OtherVuln": 0.0,
+            "Children": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 0.0,
+            "Others": 700000.0
+          },
+          "dom_total": 29447528.49008,
+          "int_total": 245711999.2854455,
+          "grand_total": 275159527.7755255
+        }
+      },
+      "CBO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 195000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 195000.0,
+            "int_total": 0.0,
+            "grand_total": 195000.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 1396326.0,
+              "Others": 796087.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 309055.0,
+              "Others": 45367.0
+            },
+            "dom_total": 2192413.0,
+            "int_total": 354422.0,
+            "grand_total": 2546835.0
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 416500.0
+            },
+            "dom_total": 0.0,
+            "int_total": 416500.0,
+            "grand_total": 416500.0
+          },
+          "ASC.08": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 349195.0
+            },
+            "dom_total": 0.0,
+            "int_total": 349195.0,
+            "grand_total": 349195.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 0.0,
+            "CLHIV": 0.0,
+            "PLHIVnotdis": 0.0,
+            "PWID": 0.0,
+            "SW": 0.0,
+            "MSM": 0.0,
+            "TG": 0.0,
+            "Prisoner": 0.0,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "OVC": 0.0,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "HCW": 0.0,
+            "Employees": 0.0,
+            "Vulnerablenotdis": 0.0,
+            "OtherVuln": 0.0,
+            "Children": 0.0,
+            "Youth": 195000.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 1396326.0,
+            "Others": 796087.0
+          },
+          "international": {
+            "PLHIV": 0.0,
+            "CLHIV": 0.0,
+            "PLHIVnotdis": 0.0,
+            "PWID": 0.0,
+            "SW": 0.0,
+            "MSM": 0.0,
+            "TG": 0.0,
+            "Prisoner": 0.0,
+            "KPnotdis": 0.0,
+            "Migrant": 0.0,
+            "OVC": 0.0,
+            "PMTCT": 0.0,
+            "Indigenous": 0.0,
+            "PartnerPLHIV": 0.0,
+            "HCW": 0.0,
+            "Employees": 0.0,
+            "Vulnerablenotdis": 0.0,
+            "OtherVuln": 0.0,
+            "Children": 0.0,
+            "Youth": 0.0,
+            "Genpop": 0.0,
+            "GenPop_notdis": 309055.0,
+            "Others": 811062.0
+          },
+          "dom_total": 2387413.0,
+          "int_total": 1120117.0,
+          "grand_total": 3507530.0
+        }
+      },
+      "CLO": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 142139.0,
+              "CLHIV": 445000.0,
+              "PLHIVnotdis": 141909.0,
+              "PWID": 691909.0,
+              "SW": 385676.0,
+              "MSM": 2510399.0,
+              "TG": 1792472.5,
+              "Prisoner": 25000.0,
+              "KPnotdis": 25000.0,
+              "Migrant": 142069.0,
+              "OVC": 25000.0,
+              "PMTCT": 25000.0,
+              "Indigenous": 25000.0,
+              "PartnerPLHIV": 141931.5,
+              "HCW": 141909.0,
+              "Employees": 141909.0,
+              "Vulnerablenotdis": 141909.0,
+              "OtherVuln": 141909.0,
+              "Children": 115000.0,
+              "Youth": 454265.5,
+              "Genpop": 142369.0,
+              "GenPop_notdis": 141909.0,
+              "Others": 36487.74
+            },
+            "international": {
+              "PLHIV": 106823.0,
+              "CLHIV": 80087.0,
+              "PLHIVnotdis": 106823.0,
+              "PWID": 2461042.78,
+              "SW": 3118225.03,
+              "MSM": 3596872.26,
+              "TG": 2317747.65,
+              "Prisoner": 0.0,
+              "KPnotdis": 600000.0,
+              "Migrant": 809688.59,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 106823.0,
+              "PartnerPLHIV": 106823.0,
+              "HCW": 26736.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 80087.0,
+              "OtherVuln": 26736.0,
+              "Children": 0.0,
+              "Youth": 317152.07,
+              "Genpop": 110180.45,
+              "GenPop_notdis": 0.0,
+              "Others": 9238.81
+            },
+            "dom_total": 7976172.24,
+            "int_total": 13981085.64,
+            "grand_total": 21957257.88
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 418144.0,
+              "CLHIV": 1010000.0,
+              "PLHIVnotdis": 418144.0,
+              "PWID": 1118144.0,
+              "SW": 68505039.0,
+              "MSM": 16874487.71,
+              "TG": 13255512.0,
+              "Prisoner": 10000.0,
+              "KPnotdis": 10000.0,
+              "Migrant": 429144.0,
+              "OVC": 10000.0,
+              "PMTCT": 10000.0,
+              "Indigenous": 16585.3,
+              "PartnerPLHIV": 418144.0,
+              "HCW": 418144.0,
+              "Employees": 418144.0,
+              "Vulnerablenotdis": 418144.0,
+              "OtherVuln": 418144.0,
+              "Children": 10000.0,
+              "Youth": 418144.0,
+              "Genpop": 451116.0,
+              "GenPop_notdis": 418144.0,
+              "Others": 10000.0
+            },
+            "international": {
+              "PLHIV": 1046441.9,
+              "CLHIV": 103270.0,
+              "PLHIVnotdis": 1040640.0,
+              "PWID": 3532427.75,
+              "SW": 17328855.91,
+              "MSM": 3839600.480000002,
+              "TG": 3663847.460000002,
+              "Prisoner": 0.0,
+              "KPnotdis": 1000000.0,
+              "Migrant": 1363908.87,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 1070640.0,
+              "PartnerPLHIV": 1070640.0,
+              "HCW": 937370.0000000002,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 133270.0,
+              "OtherVuln": 937370.0000000002,
+              "Children": 0.0,
+              "Youth": 1688045.600000002,
+              "Genpop": 1088045.6,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 105483324.01,
+            "int_total": 39844373.57000002,
+            "grand_total": 145327697.58
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 184854.0,
+              "CLHIV": 50000.0,
+              "PLHIVnotdis": 114318.0,
+              "PWID": 184854.0,
+              "SW": 214978.0,
+              "MSM": 386502.0,
+              "TG": 385014.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 70536.0,
+              "Migrant": 185004.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 70536.0,
+              "PartnerPLHIV": 184854.0,
+              "HCW": 114318.0,
+              "Employees": 114318.0,
+              "Vulnerablenotdis": 184854.0,
+              "OtherVuln": 114318.0,
+              "Children": 0.0,
+              "Youth": 185054.0,
+              "Genpop": 184978.0,
+              "GenPop_notdis": 184854.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 147781.0000000003,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 147781.0000000003,
+              "PWID": 2143886.5,
+              "SW": 697864.7000000003,
+              "MSM": 1207699.9,
+              "TG": 1147864.7,
+              "Prisoner": 0.0,
+              "KPnotdis": 1900000.0,
+              "Migrant": 197781.0000000003,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 147781.0000000003,
+              "PartnerPLHIV": 147781.0000000003,
+              "HCW": 129230.0000000002,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 18551.0,
+              "OtherVuln": 129230.0000000002,
+              "Children": 0.0,
+              "Youth": 897781.0000000002,
+              "Genpop": 147864.7000000003,
+              "GenPop_notdis": 0.0,
+              "Others": 52893.52
+            },
+            "dom_total": 3114144.0,
+            "int_total": 9261771.020000003,
+            "grand_total": 12375915.02
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 106923.0,
+              "CLHIV": 80000.0,
+              "PLHIVnotdis": 80923.0,
+              "PWID": 80923.0,
+              "SW": 510530.5,
+              "MSM": 1550623.0,
+              "TG": 1404323.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 80923.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 80923.0,
+              "HCW": 80923.0,
+              "Employees": 80923.0,
+              "Vulnerablenotdis": 80923.0,
+              "OtherVuln": 80923.0,
+              "Children": 0.0,
+              "Youth": 219740.0,
+              "Genpop": 80923.0,
+              "GenPop_notdis": 80923.0,
+              "Others": 241316.15
+            },
+            "international": {
+              "PLHIV": 533170.0,
+              "CLHIV": 63440.0,
+              "PLHIVnotdis": 233170.0,
+              "PWID": 1014881.175,
+              "SW": 5942191.640000001,
+              "MSM": 643170.0,
+              "TG": 224170.0,
+              "Prisoner": 63440.0,
+              "KPnotdis": 197792.5,
+              "Migrant": 80170.0,
+              "OVC": 63440.0,
+              "PMTCT": 63440.0,
+              "Indigenous": 224170.0,
+              "PartnerPLHIV": 224170.0,
+              "HCW": 224170.0,
+              "Employees": 63440.0,
+              "Vulnerablenotdis": 63440.0,
+              "OtherVuln": 224170.0,
+              "Children": 63440.0,
+              "Youth": 364170.0,
+              "Genpop": 224170.0,
+              "GenPop_notdis": 0.0,
+              "Others": 1295000.0
+            },
+            "dom_total": 4922685.65,
+            "int_total": 12092815.315,
+            "grand_total": 17015500.965
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 360308.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 360308.0,
+              "PWID": 360308.0,
+              "SW": 360308.0,
+              "MSM": 410308.0,
+              "TG": 460308.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 360308.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 360308.0,
+              "HCW": 360308.0,
+              "Employees": 360308.0,
+              "Vulnerablenotdis": 360308.0,
+              "OtherVuln": 360308.0,
+              "Children": 0.0,
+              "Youth": 360308.0,
+              "Genpop": 360308.0,
+              "GenPop_notdis": 360000.0,
+              "Others": 5109152.039999999
+            },
+            "international": {
+              "PLHIV": 47210.99999999996,
+              "CLHIV": 47210.99999999996,
+              "PLHIVnotdis": 47210.99999999996,
+              "PWID": 28723867.2166846,
+              "SW": 47210.99999999996,
+              "MSM": 47210.99999999996,
+              "TG": 47210.99999999996,
+              "Prisoner": 47210.99999999996,
+              "KPnotdis": 47210.99999999996,
+              "Migrant": 47210.99999999996,
+              "OVC": 47210.99999999996,
+              "PMTCT": 47210.99999999996,
+              "Indigenous": 47210.99999999996,
+              "PartnerPLHIV": 47210.99999999996,
+              "HCW": 47210.99999999996,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 57210.99999999997,
+              "Children": 0.0,
+              "Youth": 57210.99999999997,
+              "Genpop": 54594.00000000004,
+              "GenPop_notdis": 0.0,
+              "Others": 11079021.42
+            },
+            "dom_total": 10663464.04,
+            "int_total": 40632858.6366846,
+            "grand_total": 51296322.6766846
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 395308.0,
+              "CLHIV": 415308.0,
+              "PLHIVnotdis": 395308.0,
+              "PWID": 343486.0,
+              "SW": 495308.0,
+              "MSM": 630308.0,
+              "TG": 655308.0,
+              "Prisoner": 495308.0,
+              "KPnotdis": 495308.0,
+              "Migrant": 495308.0,
+              "OVC": 495308.0,
+              "PMTCT": 495308.0,
+              "Indigenous": 495308.0,
+              "PartnerPLHIV": 490308.0,
+              "HCW": 493358.0,
+              "Employees": 490308.0,
+              "Vulnerablenotdis": 490308.0,
+              "OtherVuln": 490308.0,
+              "Children": 490308.0,
+              "Youth": 490308.0,
+              "Genpop": 490308.0,
+              "GenPop_notdis": 490308.0,
+              "Others": 49152.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 230000.0,
+              "MSM": 230000.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 50000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 1425000.0
+            },
+            "dom_total": 10767156.0,
+            "int_total": 1935000.0,
+            "grand_total": 12702156.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 1607676.0,
+            "CLHIV": 2000308.0,
+            "PLHIVnotdis": 1510910.0,
+            "PWID": 2779624.0,
+            "SW": 70471839.5,
+            "MSM": 22362627.71,
+            "TG": 17952937.5,
+            "Prisoner": 530308.0,
+            "KPnotdis": 681767.0,
+            "Migrant": 1611833.0,
+            "OVC": 530308.0,
+            "PMTCT": 530308.0,
+            "Indigenous": 607429.3,
+            "PartnerPLHIV": 1676468.5,
+            "HCW": 1608960.0,
+            "Employees": 1605910.0,
+            "Vulnerablenotdis": 1676446.0,
+            "OtherVuln": 1605910.0,
+            "Children": 615308.0,
+            "Youth": 2127819.5,
+            "Genpop": 1710002.0,
+            "GenPop_notdis": 1676138.0,
+            "Others": 5446107.93
+          },
+          "international": {
+            "PLHIV": 1881426.900000001,
+            "CLHIV": 294007.9999999999,
+            "PLHIVnotdis": 1575625.0,
+            "PWID": 37876105.4216846,
+            "SW": 27364348.28,
+            "MSM": 9564553.640000002,
+            "TG": 7400840.810000003,
+            "Prisoner": 110651.0,
+            "KPnotdis": 3745003.5,
+            "Migrant": 2498759.460000001,
+            "OVC": 110651.0,
+            "PMTCT": 110651.0,
+            "Indigenous": 1596625.0,
+            "PartnerPLHIV": 1596625.0,
+            "HCW": 1364717.0,
+            "Employees": 63440.0,
+            "Vulnerablenotdis": 295348.0,
+            "OtherVuln": 1374717.0,
+            "Children": 63440.0,
+            "Youth": 3374359.670000003,
+            "Genpop": 1624854.75,
+            "GenPop_notdis": 0.0,
+            "Others": 13861153.75
+          },
+          "dom_total": 142926945.94,
+          "int_total": 117747904.1816846,
+          "grand_total": 260674850.1216846
+        }
+      },
+      "TOTAL": {
+        "categories": {
+          "ASC.01": {
+            "domestic": {
+              "PLHIV": 142139.0,
+              "CLHIV": 445000.0,
+              "PLHIVnotdis": 2066559.0,
+              "PWID": 691943.1978918059,
+              "SW": 569969.2858822205,
+              "MSM": 5062377.208343234,
+              "TG": 1826139.0078827399,
+              "Prisoner": 25000.0,
+              "KPnotdis": 25000.0,
+              "Migrant": 142069.0,
+              "OVC": 25000.0,
+              "PMTCT": 25000.0,
+              "Indigenous": 25000.0,
+              "PartnerPLHIV": 141931.5,
+              "HCW": 141909.0,
+              "Employees": 141909.0,
+              "Vulnerablenotdis": 141909.0,
+              "OtherVuln": 141909.0,
+              "Children": 115000.0,
+              "Youth": 649265.5,
+              "Genpop": 142369.0,
+              "GenPop_notdis": 141909.0,
+              "Others": 36487.74
+            },
+            "international": {
+              "PLHIV": 106823.0,
+              "CLHIV": 80087.0,
+              "PLHIVnotdis": 106823.0,
+              "PWID": 31974778.53,
+              "SW": 3171672.0084136776,
+              "MSM": 4637184.020291604,
+              "TG": 2576860.3230982474,
+              "Prisoner": 0.0,
+              "KPnotdis": 1013649.73,
+              "Migrant": 1460860.76,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 106823.0,
+              "PartnerPLHIV": 106823.0,
+              "HCW": 26736.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 80087.0,
+              "OtherVuln": 26736.0,
+              "Children": 0.0,
+              "Youth": 317152.07,
+              "Genpop": 110180.45,
+              "GenPop_notdis": 0.0,
+              "Others": 9238.81
+            },
+            "dom_total": 12865794.440000001,
+            "int_total": 45912514.701803535,
+            "grand_total": 58778309.14180353
+          },
+          "ASC.02": {
+            "domestic": {
+              "PLHIV": 418144.0,
+              "CLHIV": 1010000.0,
+              "PLHIVnotdis": 418144.0,
+              "PWID": 1118881.7807193373,
+              "SW": 68659631.27667937,
+              "MSM": 21448584.357043184,
+              "TG": 13422963.255579434,
+              "Prisoner": 10000.0,
+              "KPnotdis": 10000.0,
+              "Migrant": 429144.0,
+              "OVC": 10000.0,
+              "PMTCT": 2241353.56997868,
+              "Indigenous": 16585.3,
+              "PartnerPLHIV": 418144.0,
+              "HCW": 418144.0,
+              "Employees": 418144.0,
+              "Vulnerablenotdis": 418144.0,
+              "OtherVuln": 418144.0,
+              "Children": 10000.0,
+              "Youth": 418144.0,
+              "Genpop": 451116.0,
+              "GenPop_notdis": 3167644.0,
+              "Others": 154704.76
+            },
+            "international": {
+              "PLHIV": 1046441.9,
+              "CLHIV": 103270.0,
+              "PLHIVnotdis": 1040640.0,
+              "PWID": 10301042.25,
+              "SW": 17407205.707134593,
+              "MSM": 5469107.471436332,
+              "TG": 3814035.740993126,
+              "Prisoner": 0.0,
+              "KPnotdis": 1803000.0,
+              "Migrant": 1930863.7000000002,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 1070640.0,
+              "PartnerPLHIV": 1070640.0,
+              "HCW": 937370.0000000002,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 133270.0,
+              "OtherVuln": 937370.0000000002,
+              "Children": 0.0,
+              "Youth": 1688045.600000002,
+              "Genpop": 1088045.6,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 115505760.30000001,
+            "int_total": 49840987.96956407,
+            "grand_total": 165346748.26956406
+          },
+          "ASC.03": {
+            "domestic": {
+              "PLHIV": 184854.0,
+              "CLHIV": 50000.0,
+              "PLHIVnotdis": 114318.0,
+              "PWID": 184903.82824813094,
+              "SW": 225569.0689028087,
+              "MSM": 560242.275813296,
+              "TG": 394057.8270357648,
+              "Prisoner": 0.0,
+              "KPnotdis": 70536.0,
+              "Migrant": 185004.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 70536.0,
+              "PartnerPLHIV": 184854.0,
+              "HCW": 114318.0,
+              "Employees": 114318.0,
+              "Vulnerablenotdis": 184854.0,
+              "OtherVuln": 114318.0,
+              "Children": 0.0,
+              "Youth": 185054.0,
+              "Genpop": 184978.0,
+              "GenPop_notdis": 1009704.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 147781.0000000003,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 147781.0000000003,
+              "PWID": 3454713.59,
+              "SW": 750241.6418573458,
+              "MSM": 1218697.4046831236,
+              "TG": 1148984.6605218933,
+              "Prisoner": 0.0,
+              "KPnotdis": 1900000.0,
+              "Migrant": 916707.2977256032,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 147781.0000000003,
+              "PartnerPLHIV": 147781.0000000003,
+              "HCW": 129230.0000000002,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 18551.0,
+              "OtherVuln": 129230.0000000002,
+              "Children": 0.0,
+              "Youth": 897781.0000000002,
+              "Genpop": 147864.7000000003,
+              "GenPop_notdis": 0.0,
+              "Others": 52893.52
+            },
+            "dom_total": 4132419.0,
+            "int_total": 11356018.814787969,
+            "grand_total": 15488437.814787965
+          },
+          "ASC.04": {
+            "domestic": {
+              "PLHIV": 460000.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 342774.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 42170.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 19089.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "dom_total": 844944.0,
+            "int_total": 19089.0,
+            "grand_total": 864033.0
+          },
+          "ASC.05": {
+            "domestic": {
+              "PLHIV": 106923.0,
+              "CLHIV": 80000.0,
+              "PLHIVnotdis": 80923.0,
+              "PWID": 81161.05644391409,
+              "SW": 562230.9990699351,
+              "MSM": 2479902.6846168535,
+              "TG": 1464156.258291472,
+              "Prisoner": 0.0,
+              "KPnotdis": 80923.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 117439.6615778252,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 80923.0,
+              "HCW": 80923.0,
+              "Employees": 80923.0,
+              "Vulnerablenotdis": 80923.0,
+              "OtherVuln": 80923.0,
+              "Children": 0.0,
+              "Youth": 219740.0,
+              "Genpop": 80923.0,
+              "GenPop_notdis": 3367249.0,
+              "Others": 1045019.1900000001
+            },
+            "international": {
+              "PLHIV": 533170.0,
+              "CLHIV": 63440.0,
+              "PLHIVnotdis": 233170.0,
+              "PWID": 6257677.55803482,
+              "SW": 5943756.400207389,
+              "MSM": 805780.1207316194,
+              "TG": 234734.4190609923,
+              "Prisoner": 63440.0,
+              "KPnotdis": 197792.5,
+              "Migrant": 1815113.101379924,
+              "OVC": 63440.0,
+              "PMTCT": 63440.0,
+              "Indigenous": 224170.0,
+              "PartnerPLHIV": 224170.0,
+              "HCW": 224170.0,
+              "Employees": 63440.0,
+              "Vulnerablenotdis": 63440.0,
+              "OtherVuln": 224170.0,
+              "Children": 63440.0,
+              "Youth": 364170.0,
+              "Genpop": 224170.0,
+              "GenPop_notdis": 309055.0,
+              "Others": 1340367.0
+            },
+            "dom_total": 10171205.850000001,
+            "int_total": 19599716.099414743,
+            "grand_total": 29770921.949414752
+          },
+          "ASC.06": {
+            "domestic": {
+              "PLHIV": 360308.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 360308.0,
+              "PWID": 360518.61396181385,
+              "SW": 474399.08496921207,
+              "MSM": 2741869.571803984,
+              "TG": 503470.03934499354,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 360308.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 360308.0,
+              "HCW": 360308.0,
+              "Employees": 360308.0,
+              "Vulnerablenotdis": 360308.0,
+              "OtherVuln": 360308.0,
+              "Children": 0.0,
+              "Youth": 360308.0,
+              "Genpop": 360308.0,
+              "GenPop_notdis": 370000.0,
+              "Others": 12121270.53
+            },
+            "international": {
+              "PLHIV": 47210.99999999996,
+              "CLHIV": 47210.99999999996,
+              "PLHIVnotdis": 47210.99999999996,
+              "PWID": 131218838.87794389,
+              "SW": 337555.2799805572,
+              "MSM": 21375630.14020916,
+              "TG": 2007459.369810259,
+              "Prisoner": 47210.99999999996,
+              "KPnotdis": 42361688.63247465,
+              "Migrant": 25091916.79478952,
+              "OVC": 47210.99999999996,
+              "PMTCT": 47210.99999999996,
+              "Indigenous": 47210.99999999996,
+              "PartnerPLHIV": 47210.99999999996,
+              "HCW": 47210.99999999996,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 57210.99999999997,
+              "Children": 0.0,
+              "Youth": 57210.99999999997,
+              "Genpop": 54594.00000000004,
+              "GenPop_notdis": 0.0,
+              "Others": 11779021.42
+            },
+            "dom_total": 20174607.84008,
+            "int_total": 234766025.5152081,
+            "grand_total": 254940633.3552881
+          },
+          "ASC.07": {
+            "domestic": {
+              "PLHIV": 395308.0,
+              "CLHIV": 415308.0,
+              "PLHIVnotdis": 395308.0,
+              "PWID": 343486.0,
+              "SW": 495308.0,
+              "MSM": 630308.0,
+              "TG": 655308.0,
+              "Prisoner": 495308.0,
+              "KPnotdis": 495308.0,
+              "Migrant": 495308.0,
+              "OVC": 495308.0,
+              "PMTCT": 495308.0,
+              "Indigenous": 495308.0,
+              "PartnerPLHIV": 490308.0,
+              "HCW": 493358.0,
+              "Employees": 490308.0,
+              "Vulnerablenotdis": 490308.0,
+              "OtherVuln": 490308.0,
+              "Children": 490308.0,
+              "Youth": 490308.0,
+              "Genpop": 490308.0,
+              "GenPop_notdis": 790308.0,
+              "Others": 49152.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 12800.0,
+              "SW": 232153.848742709,
+              "MSM": 388219.7133423346,
+              "TG": 14541.62791495644,
+              "Prisoner": 0.0,
+              "KPnotdis": 197258.1763517814,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 50000.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 1841500.0
+            },
+            "dom_total": 11067156.0,
+            "int_total": 2736473.3663517814,
+            "grand_total": 13803629.366351781
+          },
+          "ASC.08": {
+            "domestic": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 0.0
+            },
+            "international": {
+              "PLHIV": 0.0,
+              "CLHIV": 0.0,
+              "PLHIVnotdis": 0.0,
+              "PWID": 0.0,
+              "SW": 0.0,
+              "MSM": 0.0,
+              "TG": 0.0,
+              "Prisoner": 0.0,
+              "KPnotdis": 0.0,
+              "Migrant": 0.0,
+              "OVC": 0.0,
+              "PMTCT": 0.0,
+              "Indigenous": 0.0,
+              "PartnerPLHIV": 0.0,
+              "HCW": 0.0,
+              "Employees": 0.0,
+              "Vulnerablenotdis": 0.0,
+              "OtherVuln": 0.0,
+              "Children": 0.0,
+              "Youth": 0.0,
+              "Genpop": 0.0,
+              "GenPop_notdis": 0.0,
+              "Others": 349195.0
+            },
+            "dom_total": 0.0,
+            "int_total": 349195.0,
+            "grand_total": 349195.0
+          }
+        },
+        "total": {
+          "domestic": {
+            "PLHIV": 2067676.0,
+            "CLHIV": 2000308.0,
+            "PLHIVnotdis": 3435560.0,
+            "PWID": 2780894.477265002,
+            "SW": 70987107.71550354,
+            "MSM": 32923284.09762055,
+            "TG": 18266094.388134405,
+            "Prisoner": 530308.0,
+            "KPnotdis": 681767.0,
+            "Migrant": 1611833.0,
+            "OVC": 530308.0,
+            "PMTCT": 3221875.231556505,
+            "Indigenous": 607429.3,
+            "PartnerPLHIV": 1676468.5,
+            "HCW": 1608960.0,
+            "Employees": 1605910.0,
+            "Vulnerablenotdis": 1676446.0,
+            "OtherVuln": 1605910.0,
+            "Children": 615308.0,
+            "Youth": 2322819.5,
+            "Genpop": 1710002.0,
+            "GenPop_notdis": 8846814.0,
+            "Others": 13448804.22
+          },
+          "international": {
+            "PLHIV": 1881426.900000001,
+            "CLHIV": 294007.9999999999,
+            "PLHIVnotdis": 1575625.0,
+            "PWID": 183238939.8059787,
+            "SW": 27842584.886336274,
+            "MSM": 33894618.870694175,
+            "TG": 9796616.141399475,
+            "Prisoner": 110651.0,
+            "KPnotdis": 47473389.03882644,
+            "Migrant": 31215461.65389505,
+            "OVC": 110651.0,
+            "PMTCT": 110651.0,
+            "Indigenous": 1596625.0,
+            "PartnerPLHIV": 1596625.0,
+            "HCW": 1364717.0,
+            "Employees": 63440.0,
+            "Vulnerablenotdis": 295348.0,
+            "OtherVuln": 1374717.0,
+            "Children": 63440.0,
+            "Youth": 3374359.670000003,
+            "Genpop": 1624854.75,
+            "GenPop_notdis": 309055.0,
+            "Others": 15372215.75
+          },
+          "dom_total": 174761887.43008,
+          "int_total": 364580020.4671301,
+          "grand_total": 539341907.8972101
+        }
+      }
+    }
+  }
+};
+    
+    // Category mapping information
+    const catDetails = {
+        "ASC.01": "Prevention (การป้องกันการติดเชื้อ)",
+        "ASC.02": "HIV Testing & Counselling (HTC) (การตรวจหาเชื้อและให้คำปรึกษา)",
+        "ASC.03": "HIV Care & Treatment (การดูแลรักษาและการรักษาเสถียรภาพ)",
+        "ASC.04": "Social Protection & Economic Support (การคุ้มครองทางสังคม)",
+        "ASC.05": "Social Enablers (การสร้างสภาพแวดล้อมที่เอื้อต่อการบริการ)",
+        "ASC.06": "Programme Enablers & Systems Strengthening (การบริหารระบบงาน)",
+        "ASC.07": "Development Synergies (การประสานการพัฒนาร่วมกัน)",
+        "ASC.08": "HIV-related Research (การศึกษาวิจัยเกี่ยวกับ HIV)"
+    };
+
+    // Current State
+    let currentYear = '2024';
+    let currentMatrixType = 'grouped'; // grouped or detailed
+
+    // Globals for Charts
+    let catChart = null;
+    let impChart = null;
+    let popChart = null;
+    let detailedPopChart = null;
+
+    // Helper functions
+    function setYear(yr) {
+        currentYear = yr;
+        
+        // Update tab styling
+        const buttons = document.querySelectorAll('#year-selector button');
+        buttons.forEach(btn => {
+            if (btn.textContent.includes(yr) || (yr === 'YoY' && btn.textContent.includes('YoY'))) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // If YoY is selected, we hide the implementer share donut
+        const impCard = document.getElementById('implementerChart').parentElement.parentElement;
+        const chartsRow = document.getElementById('charts-row');
+        
+        if (yr === 'YoY') {
+            impCard.style.display = 'none';
+            chartsRow.style.gridTemplateColumns = '1fr';
+            document.getElementById('chart-cat-title').textContent = "เปรียบเทียบงบประมาณรายปี จำแนกตามกิจกรรมหลัก (YoY)";
+            document.getElementById('chart-cat-subtitle').textContent = "ปี 2024 ปะทะ ปี 2025 (หน่วย: บาท)";
+        } else {
+            impCard.style.display = 'block';
+            chartsRow.style.gridTemplateColumns = '2fr 1fr';
+            document.getElementById('chart-cat-title').textContent = "งบประมาณรายกิจกรรมหลัก (ASC.01 - ASC.08)";
+            document.getElementById('chart-cat-subtitle').textContent = "ปี " + yr + " (หน่วย: บาท)";
+        }
+        
+        updateDashboard();
+    }
+
+    function setMatrixType(type) {
+        currentMatrixType = type;
+        document.getElementById('btn-matrix-grouped').classList.toggle('active', type === 'grouped');
+        document.getElementById('btn-matrix-detailed').classList.toggle('active', type === 'detailed');
+        renderMatrixTable();
+    }
+
+    // Rounding helper
+    function roundInt(val) {
+        return Math.round(val || 0);
+    }
+
+    function fmtInt(val) {
+        return roundInt(val).toLocaleString('th-TH');
+    }
+
+    // Compute metrics
+    function getExpValue(year, groupedOrDetailed, imp, key, fundSource) {
+        const yrData = rawData['data_' + year][groupedOrDetailed];
+        if (!yrData[imp]) return 0;
+        
+        let val = 0;
+        if (fundSource === 'domestic') {
+            val = yrData[imp]['total']['domestic'][key] || 0;
+        } else if (fundSource === 'international') {
+            val = yrData[imp]['total']['international'][key] || 0;
+        } else {
+            // combined
+            val = (yrData[imp]['total']['domestic'][key] || 0) + (yrData[imp]['total']['international'][key] || 0);
+        }
+        return val;
+    }
+
+    function getCategoryValue(year, groupedOrDetailed, imp, catCode, fundSource) {
+        const yrData = rawData['data_' + year][groupedOrDetailed];
+        if (!yrData[imp] || !yrData[imp]['categories'][catCode]) return 0;
+        
+        const cat = yrData[imp]['categories'][catCode];
+        if (fundSource === 'domestic') {
+            return cat['dom_total'] || 0;
+        } else if (fundSource === 'international') {
+            return cat['int_total'] || 0;
+        } else {
+            return cat['grand_total'] || 0;
+        }
+    }
+
+    // Update Dashboard Logic
+    function updateDashboard() {
+        const fundSource = document.getElementById('fund-source').value;
+        
+        renderKPIs(fundSource);
+        renderCharts(fundSource);
+        renderMatrixTable();
+    }
+
+    function renderKPIs(fundSource) {
+        const kpiContainer = document.getElementById('kpi-cards');
+        kpiContainer.innerHTML = '';
+
+        if (currentYear !== 'YoY') {
+            const yrData = rawData['data_' + currentYear]['grouped'];
+            
+            let totalVal = 0;
+            if (fundSource === 'domestic') {
+                totalVal = yrData['TOTAL']['total']['dom_total'];
+            } else if (fundSource === 'international') {
+                totalVal = yrData['TOTAL']['total']['int_total'];
+            } else {
+                totalVal = yrData['TOTAL']['total']['grand_total'];
+            }
+            
+            let csoVal = 0, cboVal = 0, cloVal = 0;
+            if (fundSource === 'domestic') {
+                csoVal = yrData['CSO']['total']['dom_total'] || 0;
+                cboVal = yrData['CBO']['total']['dom_total'] || 0;
+                cloVal = yrData['CLO']['total']['dom_total'] || 0;
+            } else if (fundSource === 'international') {
+                csoVal = yrData['CSO']['total']['int_total'] || 0;
+                cboVal = yrData['CBO']['total']['int_total'] || 0;
+                cloVal = yrData['CLO']['total']['int_total'] || 0;
+            } else {
+                csoVal = yrData['CSO']['total']['grand_total'] || 0;
+                cboVal = yrData['CBO']['total']['grand_total'] || 0;
+                cloVal = yrData['CLO']['total']['grand_total'] || 0;
+            }
+
+            const csoPct = totalVal > 0 ? (csoVal / totalVal * 100).toFixed(0) : 0;
+            const cboPct = totalVal > 0 ? (cboVal / totalVal * 100).toFixed(0) : 0;
+            const cloPct = totalVal > 0 ? (cloVal / totalVal * 100).toFixed(0) : 0;
+
+            kpiContainer.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">งบประมาณทั้งหมด <span>${currentYear}</span></div>
+                    <div class="kpi-value">${fmtInt(totalVal)} บาท</div>
+                    <div class="kpi-subtext">งบประมาณรวมประชากรทุกประเภท</div>
+                </div>
+                <div class="kpi-card cso">
+                    <div class="kpi-label">สัดส่วน CSO <span>${csoPct}%</span></div>
+                    <div class="kpi-value">${fmtInt(csoVal)} บาท</div>
+                    <div class="kpi-subtext">กลุ่ม Civil Society Organisation</div>
+                </div>
+                <div class="kpi-card cbo">
+                    <div class="kpi-label">สัดส่วน CBO <span>${cboPct}%</span></div>
+                    <div class="kpi-value">${fmtInt(cboVal)} บาท</div>
+                    <div class="kpi-subtext">กลุ่ม Community-Based Organisation</div>
+                </div>
+                <div class="kpi-card clo">
+                    <div class="kpi-label">สัดส่วน CLO <span>${cloPct}%</span></div>
+                    <div class="kpi-value">${fmtInt(cloVal)} บาท</div>
+                    <div class="kpi-subtext">กลุ่ม Community-Led Organisation</div>
+                </div>
+            `;
+        } else {
+            const yrData24 = rawData['data_2024']['grouped']['TOTAL']['total'];
+            const yrData25 = rawData['data_2025']['grouped']['TOTAL']['total'];
+            
+            let val24 = 0, val25 = 0;
+            if (fundSource === 'domestic') {
+                val24 = yrData24['dom_total'];
+                val25 = yrData25['dom_total'];
+            } else if (fundSource === 'international') {
+                val24 = yrData24['int_total'];
+                val25 = yrData25['int_total'];
+            } else {
+                val24 = yrData24['grand_total'];
+                val25 = yrData25['grand_total'];
+            }
+            
+            const diff = val25 - val24;
+            const diffPct = val24 > 0 ? (diff / val24 * 100).toFixed(1) : 0;
+            const trendClass = diff >= 0 ? 'trend-up' : 'trend-down';
+            const trendSign = diff >= 0 ? '+' : '';
+
+            kpiContainer.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">งบประมาณปี 2024</div>
+                    <div class="kpi-value">${fmtInt(val24)} บาท</div>
+                    <div class="kpi-subtext">งบประมาณปีฐาน</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-label">งบประมาณปี 2025</div>
+                    <div class="kpi-value">${fmtInt(val25)} บาท</div>
+                    <div class="kpi-subtext">งบประมาณปีล่าสุด</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">ส่วนต่างงบประมาณ YoY</div>
+                    <div class="kpi-value ${trendClass}">${trendSign}${fmtInt(diff)} บาท</div>
+                    <div class="kpi-subtext">คิดเป็นอัตราการเปลี่ยนแปลง <span class="${trendClass}">${trendSign}${diffPct}%</span></div>
+                </div>
+            `;
+        }
+    }
+
+    function renderCharts(fundSource) {
+        // --- 1. Category Chart ---
+        const codes = ["ASC.01", "ASC.02", "ASC.03", "ASC.04", "ASC.05", "ASC.06", "ASC.07", "ASC.08"];
+        const labels = codes.map(c => c + " " + (catDetails[c] ? catDetails[c].split(' ')[0] : ''));
+        
+        if (catChart) catChart.destroy();
+        const ctxCat = document.getElementById('categoryChart').getContext('2d');
+        
+        if (currentYear !== 'YoY') {
+            const vals = codes.map(c => getCategoryValue(currentYear, 'grouped', 'TOTAL', c, fundSource));
+            
+            catChart = new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'งบประมาณ (บาท)',
+                        data: vals.map(v => roundInt(v)),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        } else {
+            const vals24 = codes.map(c => getCategoryValue('2024', 'grouped', 'TOTAL', c, fundSource));
+            const vals25 = codes.map(c => getCategoryValue('2025', 'grouped', 'TOTAL', c, fundSource));
+            
+            catChart = new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'ปี 2024',
+                            data: vals24.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: '#9ca3af',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'ปี 2025',
+                            data: vals25.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        // --- 2. Implementer Proportion Chart ---
+        if (impChart) impChart.destroy();
+        const ctxImp = document.getElementById('implementerChart').getContext('2d');
+        
+        if (currentYear !== 'YoY') {
+            const yrData = rawData['data_' + currentYear]['grouped'];
+            let cso = 0, cbo = 0, clo = 0;
+            if (fundSource === 'domestic') {
+                cso = yrData['CSO']['total']['dom_total'] || 0;
+                cbo = yrData['CBO']['total']['dom_total'] || 0;
+                clo = yrData['CLO']['total']['dom_total'] || 0;
+            } else if (fundSource === 'international') {
+                cso = yrData['CSO']['total']['int_total'] || 0;
+                cbo = yrData['CBO']['total']['int_total'] || 0;
+                clo = yrData['CLO']['total']['int_total'] || 0;
+            } else {
+                cso = yrData['CSO']['total']['grand_total'] || 0;
+                cbo = yrData['CBO']['total']['grand_total'] || 0;
+                clo = yrData['CLO']['total']['grand_total'] || 0;
+            }
+            
+            impChart = new Chart(ctxImp, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CSO', 'CBO', 'CLO'],
+                    datasets: [{
+                        data: [roundInt(cso), roundInt(cbo), roundInt(clo)],
+                        backgroundColor: [
+                            'rgba(245, 158, 11, 0.7)', // Amber
+                            'rgba(236, 72, 153, 0.7)', // Pink
+                            'rgba(139, 92, 246, 0.7)'  // Violet
+                        ],
+                        borderColor: '#0b0f19',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#e5e7eb', boxWidth: 12, padding: 16 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 3. Population Group Chart ---
+        if (popChart) popChart.destroy();
+        const ctxPop = document.getElementById('populationChart').getContext('2d');
+        const popGroups = rawData['pop_groups'];
+        
+        if (currentYear !== 'YoY') {
+            const vals = popGroups.map(g => getExpValue(currentYear, 'grouped', 'TOTAL', g, fundSource));
+            
+            popChart = new Chart(ctxPop, {
+                type: 'bar',
+                data: {
+                    labels: popGroups,
+                    datasets: [{
+                        label: 'งบประมาณรวม (บาท)',
+                        data: vals.map(v => roundInt(v)),
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        borderColor: '#10b981',
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        } else {
+            const vals24 = popGroups.map(g => getExpValue('2024', 'grouped', 'TOTAL', g, fundSource));
+            const vals25 = popGroups.map(g => getExpValue('2025', 'grouped', 'TOTAL', g, fundSource));
+            
+            popChart = new Chart(ctxPop, {
+                type: 'bar',
+                data: {
+                    labels: popGroups,
+                    datasets: [
+                        {
+                            label: 'ปี 2024',
+                            data: vals24.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: '#9ca3af',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'ปี 2025',
+                            data: vals25.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: '#10b981',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        // --- 4. Detailed Population Chart ---
+        if (detailedPopChart) detailedPopChart.destroy();
+        const ctxDetPop = document.getElementById('detailedPopulationChart').getContext('2d');
+        
+        if (currentYear !== 'YoY') {
+            const detailedPops = rawData['detailed_pops_' + currentYear];
+            const vals = detailedPops.map(p => getExpValue(currentYear, 'detailed', 'TOTAL', p, fundSource));
+            
+            detailedPopChart = new Chart(ctxDetPop, {
+                type: 'bar',
+                data: {
+                    labels: detailedPops,
+                    datasets: [{
+                        label: 'งบประมาณรวม (บาท)',
+                        data: vals.map(v => roundInt(v)),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        } else {
+            const detailedPops = rawData['detailed_pops_2025'];
+            const vals24 = detailedPops.map(p => getExpValue('2024', 'detailed', 'TOTAL', p, fundSource));
+            const vals25 = detailedPops.map(p => getExpValue('2025', 'detailed', 'TOTAL', p, fundSource));
+            
+            detailedPopChart = new Chart(ctxDetPop, {
+                type: 'bar',
+                data: {
+                    labels: detailedPops,
+                    datasets: [
+                        {
+                            label: 'ปี 2024',
+                            data: vals24.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                            borderColor: '#9ca3af',
+                            borderWidth: 1.5,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'ปี 2025',
+                            data: vals25.map(v => roundInt(v)),
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1.5,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return value.toLocaleString(); } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+    }
+
+    function renderMatrixTable() {
+        const fundSource = document.getElementById('fund-source').value;
+        const container = document.getElementById('matrix-table-container');
+        const titleEl = document.getElementById('matrix-title');
+        
+        let html = '';
+        
+        if (currentYear !== 'YoY') {
+            titleEl.textContent = "Matrix งบประมาณปี " + currentYear + " ระหว่างประเภทผู้ดำเนินงานกับกลุ่มประชากร";
+            
+            const yrKey = 'data_' + currentYear;
+            const imps = ['CSO', 'CBO', 'CLO', 'TOTAL'];
+            
+            if (currentMatrixType === 'grouped') {
+                const popGroups = rawData['pop_groups'];
+                
+                html += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ประเภทผู้ดำเนินงาน (Implementer)</th>
+                                ${popGroups.map(g => `<th class="num-col">${g}</th>`).join('')}
+                                <th class="num-col" style="background: rgba(255, 255, 255, 0.04);">GRAND TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                imps.forEach(imp => {
+                    const isTotalRow = imp === 'TOTAL';
+                    const cssClass = isTotalRow ? 'row-total' : '';
+                    const impText = isTotalRow ? 'รวมทุกประเภทองค์กร' : imp;
+                    
+                    let impColorClass = '';
+                    if (imp === 'CSO') impColorClass = 'cso-text';
+                    if (imp === 'CBO') impColorClass = 'cbo-text';
+                    if (imp === 'CLO') impColorClass = 'clo-text';
+                    
+                    let rowSum = 0;
+                    if (fundSource === 'domestic') {
+                        rowSum = rawData[yrKey]['grouped'][imp]['total']['dom_total'] || 0;
+                    } else if (fundSource === 'international') {
+                        rowSum = rawData[yrKey]['grouped'][imp]['total']['int_total'] || 0;
+                    } else {
+                        rowSum = rawData[yrKey]['grouped'][imp]['total']['grand_total'] || 0;
+                    }
+                    
+                    html += `<tr class="${cssClass}">`;
+                    html += `<td class="imp-cell ${impColorClass}">${impText}</td>`;
+                    
+                    popGroups.forEach(g => {
+                        const val = getExpValue(currentYear, 'grouped', imp, g, fundSource);
+                        html += `<td class="num-col">${fmtInt(val)}</td>`;
+                    });
+                    
+                    html += `<td class="num-col" style="background: rgba(255, 255, 255, 0.04); font-weight: 700;">${fmtInt(rowSum)}</td>`;
+                    html += `</tr>`;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                const detailedPops = rawData['detailed_pops_' + currentYear];
+                
+                html += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>กลุ่มเป้าหมายย่อย (Detailed Population)</th>
+                                <th class="num-col cso-text">CSO</th>
+                                <th class="num-col cbo-text">CBO</th>
+                                <th class="num-col clo-text">CLO</th>
+                                <th class="num-col" style="background: rgba(255, 255, 255, 0.04); font-weight: 700;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                detailedPops.forEach(p => {
+                    const valCso = getExpValue(currentYear, 'detailed', 'CSO', p, fundSource);
+                    const valCbo = getExpValue(currentYear, 'detailed', 'CBO', p, fundSource);
+                    const valClo = getExpValue(currentYear, 'detailed', 'CLO', p, fundSource);
+                    const valTotal = getExpValue(currentYear, 'detailed', 'TOTAL', p, fundSource);
+                    
+                    html += `<tr>`;
+                    html += `<td class="txt-col">${p}</td>`;
+                    html += `<td class="num-col">${fmtInt(valCso)}</td>`;
+                    html += `<td class="num-col">${fmtInt(valCbo)}</td>`;
+                    html += `<td class="num-col">${fmtInt(valClo)}</td>`;
+                    html += `<td class="num-col" style="background: rgba(255, 255, 255, 0.04); font-weight: 700;">${fmtInt(valTotal)}</td>`;
+                    html += `</tr>`;
+                });
+                
+                const yrTotal = rawData[yrKey]['grouped'];
+                let totCso = 0, totCbo = 0, totClo = 0, totAll = 0;
+                if (fundSource === 'domestic') {
+                    totCso = yrTotal['CSO']['total']['dom_total'] || 0;
+                    totCbo = yrTotal['CBO']['total']['dom_total'] || 0;
+                    totClo = yrTotal['CLO']['total']['dom_total'] || 0;
+                    totAll = yrTotal['TOTAL']['total']['dom_total'] || 0;
+                } else if (fundSource === 'international') {
+                    totCso = yrTotal['CSO']['total']['int_total'] || 0;
+                    totCbo = yrTotal['CBO']['total']['int_total'] || 0;
+                    totClo = yrTotal['CLO']['total']['int_total'] || 0;
+                    totAll = yrTotal['TOTAL']['total']['int_total'] || 0;
+                } else {
+                    totCso = yrTotal['CSO']['total']['grand_total'] || 0;
+                    totCbo = yrTotal['CBO']['total']['grand_total'] || 0;
+                    totClo = yrTotal['CLO']['total']['grand_total'] || 0;
+                    totAll = yrTotal['TOTAL']['total']['grand_total'] || 0;
+                }
+                
+                html += `
+                    <tr class="row-total">
+                        <td class="imp-cell">GRAND TOTAL (บาท)</td>
+                        <td class="num-col">${fmtInt(totCso)}</td>
+                        <td class="num-col">${fmtInt(totCbo)}</td>
+                        <td class="num-col">${fmtInt(totClo)}</td>
+                        <td class="num-col" style="background: rgba(255, 255, 255, 0.04); font-weight: 700;">${fmtInt(totAll)}</td>
+                    </tr>
+                `;
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+        } else {
+            titleEl.textContent = "เปรียบเทียบความแตกต่างปี 2024 กับ 2025 แยกตามผู้ดำเนินงาน";
+            const imps = ['CSO', 'CBO', 'CLO', 'TOTAL'];
+            
+            if (currentMatrixType === 'grouped') {
+                const popGroups = rawData['pop_groups'];
+                
+                html += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ประเภทองค์กร</th>
+                                ${popGroups.map(g => `<th class="num-col">${g} (YoY Diff %)</th>`).join('')}
+                                <th class="num-col" style="background: rgba(255, 255, 255, 0.04);">รวมทุกกลุ่มเป้าหมาย</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                imps.forEach(imp => {
+                    const isTotalRow = imp === 'TOTAL';
+                    const cssClass = isTotalRow ? 'row-total' : '';
+                    const impText = isTotalRow ? 'รวมทุกประเภทองค์กร' : imp;
+                    
+                    let impColorClass = '';
+                    if (imp === 'CSO') impColorClass = 'cso-text';
+                    if (imp === 'CBO') impColorClass = 'cbo-text';
+                    if (imp === 'CLO') impColorClass = 'clo-text';
+                    
+                    let t24 = 0, t25 = 0;
+                    if (fundSource === 'domestic') {
+                        t24 = rawData['data_2024']['grouped'][imp]['total']['dom_total'] || 0;
+                        t25 = rawData['data_2025']['grouped'][imp]['total']['dom_total'] || 0;
+                    } else if (fundSource === 'international') {
+                        t24 = rawData['data_2024']['grouped'][imp]['total']['int_total'] || 0;
+                        t25 = rawData['data_2025']['grouped'][imp]['total']['int_total'] || 0;
+                    } else {
+                        t24 = rawData['data_2024']['grouped'][imp]['total']['grand_total'] || 0;
+                        t25 = rawData['data_2025']['grouped'][imp]['total']['grand_total'] || 0;
+                    }
+                    const diffTot = t25 - t24;
+                    const pctTot = t24 > 0 ? (diffTot / t24 * 100).toFixed(1) + '%' : 'N/A';
+                    const totColor = diffTot >= 0 ? 'trend-up' : 'trend-down';
+                    
+                    html += `<tr class="${cssClass}">`;
+                    html += `<td class="imp-cell ${impColorClass}">${impText}</td>`;
+                    
+                    popGroups.forEach(g => {
+                        const val24 = getExpValue('2024', 'grouped', imp, g, fundSource);
+                        const val25 = getExpValue('2025', 'grouped', imp, g, fundSource);
+                        const diff = val25 - val24;
+                        const pct = val24 > 0 ? (diff / val24 * 100).toFixed(0) + '%' : (val25 > 0 ? '+100%' : '0%');
+                        const numColorClass = diff >= 0 ? 'trend-up' : 'trend-down';
+                        const sign = diff > 0 ? '+' : '';
+                        
+                        html += `
+                            <td class="num-col">
+                                <div>${fmtInt(val25)}</div>
+                                <div style="font-size: 11px;" class="${numColorClass}">${sign}${fmtInt(diff)} (${pct})</div>
+                            </td>
+                        `;
+                    });
+                    
+                    const signTot = diffTot > 0 ? '+' : '';
+                    html += `
+                        <td class="num-col" style="background: rgba(255, 255, 255, 0.04); font-weight: 700;">
+                            <div>${fmtInt(t25)}</div>
+                            <div style="font-size: 11px;" class="${totColor}">${signTot}${fmtInt(diffTot)} (${pctTot})</div>
+                        </td>
+                    `;
+                    html += `</tr>`;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                const detailedPops25 = rawData['detailed_pops_2025'];
+                
+                html += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>กลุ่มเป้าหมายย่อย (YoY Comparison)</th>
+                                <th class="num-col">งบปี 2024 (บาท)</th>
+                                <th class="num-col">งบปี 2025 (บาท)</th>
+                                <th class="num-col">ส่วนต่าง (บาท)</th>
+                                <th class="num-col">อัตราการเปลี่ยนแปลง</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                detailedPops25.forEach(p => {
+                    const val24 = getExpValue('2024', 'detailed', 'TOTAL', p, fundSource);
+                    const val25 = getExpValue('2025', 'detailed', 'TOTAL', p, fundSource);
+                    const diff = val25 - val24;
+                    const pct = val24 > 0 ? (diff / val24 * 100).toFixed(1) + '%' : (val25 > 0 ? 'กิจกรรมริเริ่มใหม่ (+100%)' : '0%');
+                    const numColorClass = diff >= 0 ? 'trend-up' : 'trend-down';
+                    const sign = diff > 0 ? '+' : '';
+                    
+                    html += `<tr>`;
+                    html += `<td class="txt-col">${p}</td>`;
+                    html += `<td class="num-col">${fmtInt(val24)}</td>`;
+                    html += `<td class="num-col">${fmtInt(val25)}</td>`;
+                    html += `<td class="num-col ${numColorClass}">${sign}${fmtInt(diff)}</td>`;
+                    html += `<td class="num-col ${numColorClass}" style="font-weight:600;">${sign}${pct}</td>`;
+                    html += `</tr>`;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
+
+        container.innerHTML = html;
+    }
+
+    // Init Dashboard
+    window.onload = function() {
+        setYear('2024');
+    };
+</script>
+</body>
+</html>
