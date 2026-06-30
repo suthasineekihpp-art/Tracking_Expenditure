@@ -4995,7 +4995,7 @@
                     const val24 = getExpValue('2024', 'detailed', 'TOTAL', p, fundSource);
                     const val25 = getExpValue('2025', 'detailed', 'TOTAL', p, fundSource);
                     const diff = val25 - val24;
-                    const pct = val24 > 0 ? (diff / val24 * 100).toFixed(1) + '%' : (val25 > 0 ? 'กิจกรรมริเริ่มใหม่ (+100%)' : '0%');
+                    const pct = val24 > 0 ? (diff / val24 * 100).toFixed(1) + '%' : (val25 > 0 ? 'กิจกรรมใหม่ (+100%)' : '0%');
                     const numColorClass = diff >= 0 ? 'trend-up' : 'trend-down';
                     const sign = diff > 0 ? '+' : '';
                     
