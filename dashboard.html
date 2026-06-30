@@ -459,7 +459,7 @@
     <header>
         <div class="header-title">
             <h1>HIV/AIDS Expenditure Dashboard</h1>
-            <p>วิเคราะห์งบประมาณปี 2024 - 2025 แยกตามประเภทองค์กร (CSO/CBO/CLO) และกลุ่มประชากรเป้าหมาย</p>
+            <p>วิเคราะห์ค่าใช้จ่ายปี 2024 - 2025 แยกตามประเภทองค์กร (CSO/CBO/CLO) และกลุ่มประชากรเป้าหมาย</p>
         </div>
         
         <div class="controls">
@@ -4280,12 +4280,12 @@
         if (yr === 'YoY') {
             impCard.style.display = 'none';
             chartsRow.style.gridTemplateColumns = '1fr';
-            document.getElementById('chart-cat-title').textContent = "เปรียบเทียบงบประมาณรายปี จำแนกตามกิจกรรมหลัก (YoY)";
+            document.getElementById('chart-cat-title').textContent = "เปรียบเทียบค่าใช้จ่ายรายปี จำแนกตามกิจกรรมหลัก (YoY)";
             document.getElementById('chart-cat-subtitle').textContent = "ปี 2024 ปะทะ ปี 2025 (หน่วย: บาท)";
         } else {
             impCard.style.display = 'block';
             chartsRow.style.gridTemplateColumns = '2fr 1fr';
-            document.getElementById('chart-cat-title').textContent = "งบประมาณรายกิจกรรมหลัก (ASC.01 - ASC.08)";
+            document.getElementById('chart-cat-title').textContent = "ค่าใช้จ่ายรายกิจกรรมหลัก (ASC.01 - ASC.08)";
             document.getElementById('chart-cat-subtitle').textContent = "ปี " + yr + " (หน่วย: บาท)";
         }
         
@@ -4385,9 +4385,9 @@
 
             kpiContainer.innerHTML = `
                 <div class="kpi-card">
-                    <div class="kpi-label">งบประมาณทั้งหมด <span>${currentYear}</span></div>
+                    <div class="kpi-label">ค่าใช้จ่ายทั้งหมด <span>${currentYear}</span></div>
                     <div class="kpi-value">${fmtInt(totalVal)} บาท</div>
-                    <div class="kpi-subtext">งบประมาณรวมประชากรทุกประเภท</div>
+                    <div class="kpi-subtext">ค่าใช้จ่ายรวมประชากรทุกประเภท</div>
                 </div>
                 <div class="kpi-card cso">
                     <div class="kpi-label">สัดส่วน CSO <span>${csoPct}%</span></div>
@@ -4428,17 +4428,17 @@
 
             kpiContainer.innerHTML = `
                 <div class="kpi-card">
-                    <div class="kpi-label">งบประมาณปี 2024</div>
+                    <div class="kpi-label">ค่าใช้จ่ายปี 2024</div>
                     <div class="kpi-value">${fmtInt(val24)} บาท</div>
-                    <div class="kpi-subtext">งบประมาณปีฐาน</div>
+                    <div class="kpi-subtext">ค่าใช้จ่ายปีฐาน</div>
                 </div>
                 <div class="kpi-card success">
-                    <div class="kpi-label">งบประมาณปี 2025</div>
+                    <div class="kpi-label">ค่าใช้จ่ายปี 2025</div>
                     <div class="kpi-value">${fmtInt(val25)} บาท</div>
-                    <div class="kpi-subtext">งบประมาณปีล่าสุด</div>
+                    <div class="kpi-subtext">ค่าใช้จ่ายปีล่าสุด</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">ส่วนต่างงบประมาณ YoY</div>
+                    <div class="kpi-label">ส่วนต่างค่าใช้จ่าย YoY</div>
                     <div class="kpi-value ${trendClass}">${trendSign}${fmtInt(diff)} บาท</div>
                     <div class="kpi-subtext">คิดเป็นอัตราการเปลี่ยนแปลง <span class="${trendClass}">${trendSign}${diffPct}%</span></div>
                 </div>
@@ -4462,7 +4462,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'งบประมาณ (บาท)',
+                        label: 'ค่าใช้จ่าย (บาท)',
                         data: vals.map(v => roundInt(v)),
                         backgroundColor: 'rgba(59, 130, 246, 0.6)',
                         borderColor: '#3b82f6',
@@ -4599,7 +4599,7 @@
                 data: {
                     labels: popGroups,
                     datasets: [{
-                        label: 'งบประมาณรวม (บาท)',
+                        label: 'ค่าใช้จ่ายรวม (บาท)',
                         data: vals.map(v => roundInt(v)),
                         backgroundColor: 'rgba(16, 185, 129, 0.6)',
                         borderColor: '#10b981',
@@ -4689,7 +4689,7 @@
                 data: {
                     labels: detailedPops,
                     datasets: [{
-                        label: 'งบประมาณรวม (บาท)',
+                        label: 'ค่าใช้จ่ายรวม (บาท)',
                         data: vals.map(v => roundInt(v)),
                         backgroundColor: 'rgba(59, 130, 246, 0.6)',
                         borderColor: '#3b82f6',
@@ -4776,7 +4776,7 @@
         let html = '';
         
         if (currentYear !== 'YoY') {
-            titleEl.textContent = "Matrix งบประมาณปี " + currentYear + " ระหว่างประเภทผู้ดำเนินงานกับกลุ่มประชากร";
+            titleEl.textContent = "Matrix ค่าใช้จ่ายปี " + currentYear + " ระหว่างประเภทผู้ดำเนินงานกับกลุ่มประชากร";
             
             const yrKey = 'data_' + currentYear;
             const imps = ['CSO', 'CBO', 'CLO', 'TOTAL'];
